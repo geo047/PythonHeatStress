@@ -16,30 +16,34 @@ filenm = "/home/g/PyCharm/PythonHeatStress/Data/acidbu22.xlsx"
 mydf = pd.read_excel(filenm, sheet_name='Sheet1',
                       na_values=".")
 mydf.columns = mydf.columns.str.strip() # remove pesky spaces in col names
-print(mydf.columns)
 mydf.sort_values(by=['ID', 'Sample_Date', 'treatment'], inplace=True)
 mydf = mydf.astype( {'ID':'string', 'Sample':'int', 'treatment':'string'}  )
 mydf['treatment'].replace({'trt_1':'diet I', 'trt_2':'diet II','trt_3':'diet III'}, inplace=True)
+# remove rows with these dates 2022-09-22, and after 17/10
+mydf.query('~(Sample_Date=="2022-09-22" or Sample_Date > "2022-10-17") ', inplace=True)
+mydf.Sample -= 1 # reindexing Sample day number to start from 1.
+mydf = mydf.astype({"Sample": 'category'})
 
-
-## Construct dataframe for plotting means
-#df = mydf.groupby(['Sample','treatment'])['sodium'].mean().to_frame(name='mean').reset_index()
-#df.columns = ['CollDay','Diet','Mean']
-#df = df.pivot(columns='Diet',  index='CollDay', values='Mean')
-#print(df.head())
 
 cols = mydf.columns.values
 cols= np.delete( cols, [0,1,2,3] )  # trait names from columns of dataframe
+
 fig = plt.figure()
-fig.subplots_adjust(hspace=0.4, wspace=0.4)
-ax = fig.add_subplot(2, 2, 1)
-plot1 = myplt.my_plot(df=mydf, traitnme='sodium')
-ax = fig.add_subplot(2, 2, 2)
-plot1 = myplt.my_plot(df=mydf, traitnme='sodium')
-ax = fig.add_subplot(2, 2, 3)
-plot1 = myplt.my_plot(df=mydf, traitnme='sodium')
-ax = fig.add_subplot(2, 2, 4)
-plot1 = myplt.my_plot(df=mydf, traitnme='sodium')
+fig.subplots_adjust(hspace=0.6, wspace=0.6)
+counter = 0
+for ii in cols[0:9]:
+    counter += 1
+    ax = fig.add_subplot(3, 3, counter)
+    p = myplt.my_plot(df=mydf, traitnme=ii)
+
+
+
+# ax = fig.add_subplot(2, 2, 2)
+# plot1 = myplt.my_plot(df=mydf, traitnme='sodium')
+# ax = fig.add_subplot(2, 2, 3)
+# plot1 = myplt.my_plot(df=mydf, traitnme='sodium')
+# ax = fig.add_subplot(2, 2, 4)
+# plot1 = myplt.my_plot(df=mydf, traitnme='sodium')
 
 
 plt.show()
