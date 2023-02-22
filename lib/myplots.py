@@ -2,10 +2,29 @@
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-def my_plot(df, ylab:str):
-    sp = sns.lineplot(df)
-    sp.set(xlabel="collection day", ylabel=ylab)
-    plt.show()
+
+def my_plot(df, traitnme:str):
+    sns.set(font_scale=1.5)
+    sns.set_style('ticks')
+    #sns.set_palette("bright")
+
+    mypal = sns.color_palette("bright", 3, desat=1)
+
+    # Use palplot and pass in the variable:
+
+    sp = sns.lineplot(data=df, x='Sample', y=traitnme, hue='treatment', errorbar=('se', 1.96),
+                      hue_order=['diet I', 'diet II', 'diet III'], alpha=0.925, palette=mypal, lw=3)
+    sp.set(xlabel="collection day", ylabel= ('mean within diet')   , title= traitnme )
+    sp.grid(False)
+    handles, labels = sp.get_legend_handles_labels()
+    sp.legend(handles=handles[0:], labels=labels[0:])
+
+
+
+
+
+    return sp
+    #plt.show()
 
 #
 # mydfplt = mydf.pivot(index='Sample', columns='ID', values='sodium')
