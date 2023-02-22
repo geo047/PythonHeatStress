@@ -30,6 +30,7 @@ mydf.Sample -= 1 # reindexing Sample day number to start from 1.
 mydf = mydf.astype({"Sample": 'category'})
 
 
+
 ## CK
 print(mydf.treatment.unique())
 print(mydf.query('treatment == "diet I"' ).groupby(['treatment','Sample'])['CK'].mean())
