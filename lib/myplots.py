@@ -4,7 +4,7 @@ import seaborn as sns
 
 
 def my_plot(df, traitnme:str):
-    sns.set(font_scale=1)
+    sns.set(font_scale=0.5)
     sns.set_style('ticks')
     #sns.set_palette("bright")
 
@@ -19,7 +19,7 @@ def my_plot(df, traitnme:str):
     handles, labels = sp.get_legend_handles_labels()
     sp.legend(handles=handles[0:], labels=labels[0:])
     plt.legend(loc='upper right')
-    plt.setp(sp.get_legend().get_texts(), fontsize='8')
+    plt.setp(sp.get_legend().get_texts(), fontsize='4')
     plt.axvline(x=2.5, linestyle='dashed')
     plt.axvline(x=7.5, linestyle='dashed')
     return sp

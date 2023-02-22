@@ -5,6 +5,11 @@ import pandas as pd
 import numpy as np
 #import seaborn as sns
 import matplotlib.pyplot as plt
+import matplotlib
+#from matplotlib.backends.backend_pgf import FigureCanvasPgf
+#matplotlib.backend_bases.register_backend('pdf', FigureCanvasPgf)
+
+
 pd.set_option('display.max_columns', 30)
 pd.set_option('display.min_rows', 100)
 pd.set_option('display.width', 800)
@@ -25,8 +30,18 @@ mydf.Sample -= 1 # reindexing Sample day number to start from 1.
 mydf = mydf.astype({"Sample": 'category'})
 
 
+## CK
+print(mydf.treatment.unique())
+print(mydf.query('treatment == "diet I"' ).groupby(['treatment','Sample'])['CK'].mean())
+exit()
+
+
+
+
 cols = mydf.columns.values
 cols= np.delete( cols, [0,1,2,3] )  # trait names from columns of dataframe
+
+print(len(cols))
 
 fig = plt.figure()
 fig.subplots_adjust(hspace=0.6, wspace=0.6)
@@ -35,16 +50,39 @@ for ii in cols[0:9]:
     counter += 1
     ax = fig.add_subplot(3, 3, counter)
     p = myplt.my_plot(df=mydf, traitnme=ii)
+plt.savefig('multiplotfig1.pdf')
+
+
+fig = plt.figure()
+fig.subplots_adjust(hspace=0.6, wspace=0.6)
+counter = 0
+for ii in cols[0:9]:
+    counter += 1
+    ax = fig.add_subplot(3, 3, counter)
+    p = myplt.my_plot(df=mydf, traitnme=ii)
+plt.savefig('multiplotfig1.pdf')
+
+
+fig = plt.figure()
+fig.subplots_adjust(hspace=0.6, wspace=0.6)
+counter =0
+for ii in cols[9:18]:
+    counter += 1
+    print(counter)
+    ax = fig.add_subplot(3, 3, counter)
+    p = myplt.my_plot(df=mydf, traitnme=ii)
+plt.savefig('multiplotfig2.pdf')
+
+fig = plt.figure()
+fig.subplots_adjust(hspace=0.6, wspace=0.6)
+counter = 0
+for ii in cols[18:25]:
+    counter += 1
+    ax = fig.add_subplot(3, 3, counter)
+    p = myplt.my_plot(df=mydf, traitnme=ii)
+plt.savefig('multiplotfig3.pdf')
 
 
 
-# ax = fig.add_subplot(2, 2, 2)
-# plot1 = myplt.my_plot(df=mydf, traitnme='sodium')
-# ax = fig.add_subplot(2, 2, 3)
-# plot1 = myplt.my_plot(df=mydf, traitnme='sodium')
-# ax = fig.add_subplot(2, 2, 4)
-# plot1 = myplt.my_plot(df=mydf, traitnme='sodium')
-
-
-plt.show()
+#plt.show()
 
