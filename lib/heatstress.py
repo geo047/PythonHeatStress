@@ -27,7 +27,20 @@ mydf['treatment'].replace({'trt_1':'diet I', 'trt_2':'diet II','trt_3':'diet III
 # remove rows with these dates 2022-09-22, and after 17/10
 mydf.query('~(Sample_Date=="2022-09-22" or Sample_Date > "2022-10-17") ', inplace=True)
 mydf.Sample -= 1 # reindexing Sample day number to start from 1.
+
+#print(mydf.Sample_Date.unique())
+
 #mydf = mydf.astype({"Sample": 'category'})
+# create Event column
+conditions = [
+    mydf.Sample_Date <= '2022-10-01',
+    (mydf.Sample_Date > '2022-10-01') & (mydf.Sample_Date <= '2022-10-08'),
+    mydf.Sample_Date > '2022-10-08'
+]
+
+values = ['PreHeat', 'Heat', 'Recovery']
+mydf['Event'] = np.select(conditions, values, default=None)
+#print(mydf.groupby('Event').count()) #  the numbers check out.
 
 
 
@@ -38,9 +51,10 @@ mydf.Sample -= 1 # reindexing Sample day number to start from 1.
 
 
 
-
 cols = mydf.columns.values
-cols= np.delete( cols, [0,1,2,3] )  # trait names from columns of dataframe
+cols= np.delete( cols, [0,1,2,3,29] )  # trait names from columns of dataframe
+
+
 
 # This is clunky but for some reason, the first time plt.figure is called,
 # the first plot in the panel has incorrect font size (they are huge).
@@ -135,13 +149,26 @@ emmeans =  importr('emmeans')
 base = importr('base')
 
 
-r_dataframe = pandas2ri.py2rpy(mydf)
-print(r_dataframe)
+# PreHeat, Heat, Recovery
+print(mydf.Event.unique())
+df = mydf.query('Event == "PreHeat"')[['treatment','ID','sodium']]
 
-print(mydf.columns.values)
-print(mydf.Sample_Date.unique())
+print(df)
+r_dataframe = pandas2ri.py2rpy(df)
 
-res = lme4.lmer('sodium ~ treatment + (1 + treatment|ID)', data = r_dataframe)
+print(df.treatment.unique())
+print(df.ID.unique())
+exit()
+
+#res = lme4.lmer('sodium ~ treatment + (1 + treatment|ID)', data = df )
+res = lme4.lmer('sodium ~ treatment + (1 + treatment|ID)', data = r_dataframe )
+
+print(base.summary(res))
+# TO DO
+# 1. create new variable based on data for events Pre, Heat, Recovery
+# 2 Run lmer analysis for each event type for each trait
+
+
 
 #print(res)
 
