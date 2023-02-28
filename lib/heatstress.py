@@ -8,6 +8,9 @@ import matplotlib.pyplot as plt
 import matplotlib
 #from matplotlib.backends.backend_pgf import FigureCanvasPgf
 #matplotlib.backend_bases.register_backend('pdf', FigureCanvasPgf)
+import rpy2.robjects as ro
+from rpy2.robjects.packages import importr
+from rpy2.robjects import pandas2ri
 
 
 pd.set_option('display.max_columns', 30)
@@ -147,27 +150,83 @@ lme4 =     importr('lme4')
 lmerTest = importr('lmerTest')
 emmeans =  importr('emmeans')
 base = importr('base')
+flexplot = importr('flexplot')
 
 
 # PreHeat, Heat, Recovery
-print(mydf.Event.unique())
-df = mydf.query('Event == "PreHeat"')[['treatment','ID','sodium']]
+#print(mydf.Event.unique())
+df = mydf.query('Event == "Heat"')[['treatment','ID','sodium']]
 
-print(df)
 r_dataframe = pandas2ri.py2rpy(df)
+res = lme4.lmer('sodium ~ treatment + (1 + treatment|ID)', data = df )
+print(base.summary(res))
+rprint = robjects.globalenv.get("print")
 
-print(df.treatment.unique())
-print(df.ID.unique())
+
+grdevices = importr('grDevices')
+grdevices.png(file="/home/g/hope.png", width=512, height=512)
+flexplot.visualize(res, model="res")
+grdevices.dev_off()
+
+
+
 exit()
 
-#res = lme4.lmer('sodium ~ treatment + (1 + treatment|ID)', data = df )
-res = lme4.lmer('sodium ~ treatment + (1 + treatment|ID)', data = r_dataframe )
 
-print(base.summary(res))
+
+
+
+with ro.default_converter + pandas2ri.converter:
+  r_from_pd_df = ro.conversion.get_conversion().py2rpy(mydf)
+robjects.globalenv["my_r_df"] = r_from_pd_df
+robjects.r('print(my_r_df[1:5,])')
+
+# robjects.r('''
+# library(lme4)
+# print(r_dataframe)
+# #res = lmer('sodium ~ treatment + (1 + treatment|ID)', data = r_dataframe )
+# #summary(res)
+# ''')
+
+
+
+
+robjects.r('''
+library(lme4)
+library(emmeans)
+library(flexplot)
+heatlme  = lmer('sodium ~ treatment*Event + (1+treatment|ID)', data = my_r_df )
+print(summary(heatlme))
+pdf("/home/g/hope.pdf")
+flexplot::visualize(heatlme, plot="heatlme")
+dev.off()
+
+
+heat_emm <- emmeans(heatlme, "Event")
+heat_emm_df <- as.data.frame(heat_emm) 
+print(heat_emm_df)
+
+''')
+
+
+exit()
+
+
 # TO DO
 # 1. create new variable based on data for events Pre, Heat, Recovery
 # 2 Run lmer analysis for each event type for each trait
 
+rcode = robjects.r('''
+library(lme4)
+print(r_dataframe)
+#print(df)
+#res = lmer('sodium ~ treatment + (1 + treatment|ID)', data = r_dataframe )
+#summary(res)
+'''
+)
+
+
+exit()
 
 
 #print(res)
