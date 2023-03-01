@@ -19,11 +19,12 @@ pd.set_option('display.max_colwidth', 20)
 #-----------------------------------
 # Create Input File
 #----------------------------------
-import createInputFile
+from createInputFile import mydf
 
-# obtained by first running createInputFile.py
-mydf = pd.read_csv('/home/g/PyCharm/PythonHeatStress/Data/cleanedData.csv')
-# extracting names of the traits in mydf. Removing the fixed effects cols.
+#
+# # obtained by first running createInputFile.py
+# mydf = pd.read_csv('/home/g/PyCharm/PythonHeatStress/Data/cleanedData.csv')
+# # extracting names of the traits in mydf. Removing the fixed effects cols.
 cols = mydf.columns.values
 cols= np.delete( cols, [0,1,2,3,29] )  # trait names from columns of dataframe
 
@@ -82,10 +83,10 @@ flexplot = importr('flexplot')
 
 
 # Looking at each event in turn.
-df = mydf.query('Event == "Heat"')[['treatment','ID','sodium', 'Sample']]
+df = mydf.query('Event == "Heat"')[['Diet','ID','sodium', 'Sample']]
 r_dataframe = pandas2ri.py2rpy(df)   # convert pandas to R dataframe
-#res = lme4.lmer('sodium ~ treatment + (1 + treatment|ID)', data =r_dataframe )
-res = lme4.lmer('sodium ~ treatment + (1|ID)', data =r_dataframe )
+#res = lme4.lmer('sodium ~ Diet + (1 + Diet|ID)', data =r_dataframe )
+res = lme4.lmer('sodium ~ Diet + (1|ID)', data =r_dataframe )
 
 robjects.r('print(names)')
 
@@ -100,7 +101,7 @@ xx=flexplot.estimates(res)
 print(xx)
 
 # emmeans
-emm = emmeans.emmeans(res, "treatment")
+emm = emmeans.emmeans(res, "Diet")
 base.print(emm)
 #exit()
 
@@ -127,7 +128,7 @@ robjects.r('print(my_r_df[1:5,])')
 # robjects.r('''
 # library(lme4)
 # print(r_dataframe)
-# #res = lmer('sodium ~ treatment + (1 + treatment|ID)', data = r_dataframe )
+# #res = lmer('sodium ~ Diet + (1 + Diet|ID)', data = r_dataframe )
 # #summary(res)
 # ''')
 
@@ -137,10 +138,10 @@ robjects.r('print(my_r_df[1:5,])')
 robjects.r('''
 library(lme4)
 library(emmeans)
-heatlme  = lmer('sodium ~ treatment*Event + (1+treatment|ID)', data = my_r_df )
+heatlme  = lmer('sodium ~ Diet*Event + (1+Diet|ID)', data = my_r_df )
 print(summary(heatlme))
 print(class(heatlme))
-emm1 = emmeans(heatlme, ~treatment|Event)
+emm1 = emmeans(heatlme, ~Diet|Event)
 print(pairs(emm1))
 
 
@@ -159,7 +160,7 @@ rcode = robjects.r('''
 library(lme4)
 print(r_dataframe)
 #print(df)
-#res = lmer('sodium ~ treatment + (1 + treatment|ID)', data = r_dataframe )
+#res = lmer('sodium ~ Diet + (1 + Diet|ID)', data = r_dataframe )
 #summary(res)
 '''
 )
