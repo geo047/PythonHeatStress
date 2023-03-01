@@ -1,13 +1,10 @@
 # first draft
 
-import myplots as myplt
+
 import pandas as pd
 import numpy as np
-#import seaborn as sns
 import matplotlib.pyplot as plt
 import matplotlib
-#from matplotlib.backends.backend_pgf import FigureCanvasPgf
-#matplotlib.backend_bases.register_backend('pdf', FigureCanvasPgf)
 import rpy2.robjects as ro
 from rpy2.robjects.packages import importr
 from rpy2.robjects import pandas2ri
@@ -19,104 +16,34 @@ pd.set_option('display.width', 800)
 pd.set_option('display.max_colwidth', 20)
 
 
-# Read data sheets
-filenm = "/home/g/PyCharm/PythonHeatStress/Data/acidbu22.xlsx"
-mydf = pd.read_excel(filenm, sheet_name='Sheet1',
-                      na_values=".")
-mydf.columns = mydf.columns.str.strip() # remove pesky spaces in col names
-mydf.sort_values(by=['ID', 'Sample_Date', 'treatment'], inplace=True)
-mydf = mydf.astype( {'ID':'string', 'Sample':'int', 'treatment':'string'}  )
-mydf['treatment'].replace({'trt_1':'diet I', 'trt_2':'diet II','trt_3':'diet III'}, inplace=True)
-# remove rows with these dates 2022-09-22, and after 17/10
-mydf.query('~(Sample_Date=="2022-09-22" or Sample_Date > "2022-10-17") ', inplace=True)
-mydf.Sample -= 1 # reindexing Sample day number to start from 1.
+#-----------------------------------
+# Create Input File
+#----------------------------------
+import createInputFile
 
-#print(mydf.Sample_Date.unique())
-
-#mydf = mydf.astype({"Sample": 'category'})
-# create Event column
-conditions = [
-    mydf.Sample_Date <= '2022-10-01',
-    (mydf.Sample_Date > '2022-10-01') & (mydf.Sample_Date <= '2022-10-08'),
-    mydf.Sample_Date > '2022-10-08'
-]
-
-values = ['PreHeat', 'Heat', 'Recovery']
-mydf['Event'] = np.select(conditions, values, default=None)
-#print(mydf.groupby('Event').count()) #  the numbers check out.
-
-
-
-## CK
-#print(mydf.treatment.unique())
-#print(mydf.query('treatment == "diet I"' ).groupby(['treatment','Sample'])['CK'].mean())
-
-
-
-
+# obtained by first running createInputFile.py
+mydf = pd.read_csv('/home/g/PyCharm/PythonHeatStress/Data/cleanedData.csv')
+# extracting names of the traits in mydf. Removing the fixed effects cols.
 cols = mydf.columns.values
 cols= np.delete( cols, [0,1,2,3,29] )  # trait names from columns of dataframe
 
 
 
-# This is clunky but for some reason, the first time plt.figure is called,
-# the first plot in the panel has incorrect font size (they are huge).
-# All the multi-panel plots followingn this are fine. Weird.
-fig = plt.figure()
-fig.subplots_adjust(hspace=0.6, wspace=0.6)
-counter = 0
-for ii in cols[0:9]:
-    counter += 1
-    ax = fig.add_subplot(3, 3, counter)
-    p = myplt.my_plot(df=mydf, traitnme=ii)
-plt.savefig('multiplotfig1.pdf')
+#-------------------------------------------#
+# Create  Plots over Time               #
+#-------------------------------------------#
+import createMeanPlots
+
+exit()
 
 
-fig = plt.figure()
-fig.subplots_adjust(hspace=0.6, wspace=0.6)
-counter = 0
-for ii in cols[0:9]:
-    counter += 1
-    ax = fig.add_subplot(3, 3, counter)
-    p = myplt.my_plot(df=mydf, traitnme=ii)
-plt.savefig('multiplotfig1.pdf')
-
-
-fig = plt.figure()
-fig.subplots_adjust(hspace=0.6, wspace=0.6)
-counter =0
-for ii in cols[9:18]:
-    counter += 1
-    ax = fig.add_subplot(3, 3, counter)
-    p = myplt.my_plot(df=mydf, traitnme=ii)
-plt.savefig('multiplotfig2.pdf')
-
-fig = plt.figure()
-fig.subplots_adjust(hspace=0.6, wspace=0.6)
-counter = 0
-for ii in cols[18:25]:
-    counter += 1
-    ax = fig.add_subplot(3, 3, counter)
-    p = myplt.my_plot(df=mydf, traitnme=ii)
-plt.savefig('multiplotfig3.pdf')
 
 
 
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ## One Way Anova of all traits
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-import scipy.stats as stats
-
-
-for ii in cols:
-    #print(mydf.query('treatment == "diet I"'))
-
-    fvalue, pvalue = stats.f_oneway(mydf.query('treatment == "diet I"')[ii],
-                                    mydf.query('treatment == "diet II"')[ii],
-                                    mydf.query('treatment == "diet III"')[ii],
-                                    )
-    print(f'Trait = {ii }   F value = {round(fvalue,3)} p-value = {round(pvalue,3)}')
-
+import oneWayANOVA
 
 
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -140,7 +67,6 @@ for ii in cols:
 import rpy2.robjects as robjects
 from rpy2.robjects import pandas2ri
 from rpy2.robjects.packages import importr, data
-robjects.r['options'](warn=-1)  # turn warning messages off
 
 pandas2ri.activate()   # very import step !!!!!
 
@@ -150,27 +76,44 @@ lme4 =     importr('lme4')
 lmerTest = importr('lmerTest')
 emmeans =  importr('emmeans')
 base = importr('base')
+stats =  importr('stats')
+methods = importr('methods')
 flexplot = importr('flexplot')
 
 
-# PreHeat, Heat, Recovery
-#print(mydf.Event.unique())
-df = mydf.query('Event == "Heat"')[['treatment','ID','sodium']]
+# Looking at each event in turn.
+df = mydf.query('Event == "Heat"')[['treatment','ID','sodium', 'Sample']]
+r_dataframe = pandas2ri.py2rpy(df)   # convert pandas to R dataframe
+#res = lme4.lmer('sodium ~ treatment + (1 + treatment|ID)', data =r_dataframe )
+res = lme4.lmer('sodium ~ treatment + (1|ID)', data =r_dataframe )
 
-r_dataframe = pandas2ri.py2rpy(df)
-res = lme4.lmer('sodium ~ treatment + (1 + treatment|ID)', data = df )
+robjects.r('print(names)')
+
+print(stats.anova(res))
 print(base.summary(res))
-rprint = robjects.globalenv.get("print")
-
-
-grdevices = importr('grDevices')
-grdevices.png(file="/home/g/hope.png", width=512, height=512)
-flexplot.visualize(res, model="res")
-grdevices.dev_off()
-
-
+#print(lmerTest.anova_lmerModLmerTest(res, ddf="Kenward-Roger"))
+print(lmerTest.anova_lmerModLmerTest(res))
 
 exit()
+
+xx=flexplot.estimates(res)
+print(xx)
+
+# emmeans
+emm = emmeans.emmeans(res, "treatment")
+base.print(emm)
+#exit()
+
+# for viewing some of the results but still not the best because it is not over Sample
+print(base.summary(res))
+xx=flexplot.visualize(res, plot="model")
+base.print(xx)
+import time
+#time.sleep(40)
+
+
+
+
 
 
 
@@ -194,20 +137,16 @@ robjects.r('print(my_r_df[1:5,])')
 robjects.r('''
 library(lme4)
 library(emmeans)
-library(flexplot)
 heatlme  = lmer('sodium ~ treatment*Event + (1+treatment|ID)', data = my_r_df )
 print(summary(heatlme))
-pdf("/home/g/hope.pdf")
-flexplot::visualize(heatlme, plot="heatlme")
-dev.off()
+print(class(heatlme))
+emm1 = emmeans(heatlme, ~treatment|Event)
+print(pairs(emm1))
 
-
-heat_emm <- emmeans(heatlme, "Event")
-heat_emm_df <- as.data.frame(heat_emm) 
-print(heat_emm_df)
 
 ''')
 
+print("the end ")
 
 exit()
 
