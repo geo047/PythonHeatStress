@@ -1,13 +1,13 @@
 import scipy.stats as stats
 import pandas as pd
 import numpy as np
+from createInputFile import read_clean
 
+mydf = read_clean()
 
-
-
-# obtained by first running createInputFile.py
-mydf = pd.read_csv('/home/g/PyCharm/PythonHeatStress/Data/cleanedData.csv')
-mydf = mydf.astype( {'ID':'string', 'Sample':'int', 'Diet':'string'}  )
+# # obtained by first running createInputFile.py
+# mydf = pd.read_csv('/home/g/PyCharm/PythonHeatStress/Data/cleanedData.csv')
+# mydf = mydf.astype( {'ID':'string', 'Sample':'int', 'Diet':'string'}  )
 
 # extracting names of the traits in mydf. Removing the fixed effects cols.
 cols = mydf.columns.values

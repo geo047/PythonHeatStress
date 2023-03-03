@@ -3,12 +3,14 @@ import matplotlib
 import pandas as pd
 import numpy as np
 import myplots as myplt
+from createInputFile import read_clean
 
 
+mydf = read_clean()
 
-# obtained by first running createInputFile.py
-mydf = pd.read_csv('/home/g/PyCharm/PythonHeatStress/Data/cleanedData.csv')
-mydf = mydf.astype( {'ID':'string', 'Sample':'int', 'Diet':'string'}  )
+# # obtained by first running createInputFile.py
+# mydf = pd.read_csv('/home/g/PyCharm/PythonHeatStress/Data/cleanedData.csv')
+# mydf = mydf.astype( {'ID':'string', 'Sample':'int', 'Diet':'string'}  )
 # extracting names of the traits in mydf. Removing the fixed effects cols.
 cols = mydf.columns.values
 cols= np.delete( cols, [0,1,2,3,29] )  # trait names from columns of dataframe

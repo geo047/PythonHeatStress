@@ -14,12 +14,14 @@ pd.set_option('display.max_columns', 30)
 pd.set_option('display.min_rows', 100)
 pd.set_option('display.width', 800)
 pd.set_option('display.max_colwidth', 20)
+from createInputFile import read_clean
 
 
 #-----------------------------------
-# Create Input File
+# Read data and create dataframe
 #----------------------------------
-from createInputFile import mydf
+
+mydf = read_clean()
 
 #
 # # obtained by first running createInputFile.py
@@ -64,6 +66,13 @@ cols= np.delete( cols, [0,1,2,3,29] )  # trait names from columns of dataframe
 # r_dataframe = pandas2ri.py2rpy(pd_df)
 # print(r_dataframe)
 
+from myfunctions import my_analysis
+
+my_analysis(TRAITvalue="sodium")
+exit()
+
+
+
 import rpy2.robjects as robjects
 from rpy2.robjects import pandas2ri
 from rpy2.robjects.packages import importr, data
@@ -82,231 +91,39 @@ flexplot = importr('flexplot')
 nlme = importr('nlme')
 pb = importr('pbkrtest')
 printr = robjects.r('print')
-
-
 r_dataframe = pandas2ri.py2rpy(mydf)  # convert pandas into R dataframe
-#
-# # baseline model
-# # Here, baseline animal value is allowed to be different in
-# # the different Events. Not sure if this is better than just having
-# # (1|ID) where there is an overall baseline value throughout the study.
-# # (1:ID:Event) captures idea that some animals will do inherently better during heat event.
-# baseline = lme4.lmer('sodium ~ 1 + (Event|ID)', data= r_dataframe)
-# #robjects.r('print(model.comparison)')
-# #exit()
-#
-# ##### print(nlme.ranef(baseline))   # random effect values
-# ##### print(flexplot.icc(baseline))
-# # ICC = 0.43
-# # 43% of the variability  can be explained by clustering of ID within Events
-#
-# #print(flexplot.visualize(baseline, plot="model"))
-# import time
-# #time.sleep(10)
-#
-#
-# # Testing: does a more sophisticated random effect for ID do a
-# # significantly better job of fitting the data.
-# mod1 = lme4.lmer('sodium ~ Diet * Event + (Event|ID) ', data =r_dataframe )
-# mod2 = lme4.lmer('sodium ~ Diet * Event + (1|ID) ', data =r_dataframe )
-# print(stats.anova(mod2, mod1))
-#
-# print(lmerTest.anova(mod1))
-# exit()
-#
-# robjects.globalenv["df"] = r_dataframe
-#
-# robjects.r('''
-# library(flexplot)
-# library(lme4)
-# modfull = lmer('sodium ~ Diet + Event + (Event|ID)' , data =df)
-# modreduced = lmer('sodium ~ Diet + Event + (1|ID)', data = df )
-# #print(summary(mod1))
-# xx = anova(modreduced, modfull)
-# print(xx)
-# '''
-# )
-# exit()
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# Full model:
+# y ~ Diet*Event + (1 + Event|ID)
+# random effect of animal is allowed to change within Event type
+# Usefull commands
+#       print(stats.anova(mod2, mod1))
+#       print(lmerTest.anova(mod1))
+#       robjects.globalenv["df"] = r_dataframe
+#
 #  Model Building and Significance Testing via
 #  https://www.ssc.wisc.edu/sscc/pubs/MM/MM_TestEffects.html
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-# Full model. (Event|ID) is random effect that allows baseline animal effect to
-# vary with Event type ie. different animal baseline for each heat event.
-# We could also consider (1|ID) which is a random intercept effect that fits an random
-# effect for the animal over the entire study.
-#  Analysis Steps
-#  Test for best random effect (Event|ID) or (1|ID) via AIC
-#
-#  Test if interaction term Event*Diet is significant via AIC and F value
-#
-#  If no interaction, test significance of main effects
 
 
-#-----------------------------------------------
-#  Analysis of Sodium Trait
-#  Conclusion: Diet is having no impact on sodium
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Analysis of sodium
+# No significant contrasts
+#import sodium
 
+
+# Analysis of potassium
+# No significant contrasts
+#import potassium
+
+# Analysis of chloride
+# No significant contrasts
+#import chloride
+
+# Bicarbonate
+import bicarbonate
 
 
 
-TRAITvalue = "sodium"
-
-# Step 1: Testing if (Event|ID) or (1|ID) is better model
-m_I_E = lme4.lmer(  TRAITvalue + '~ 1 + Diet*Event +  (Event|ID)', data= r_dataframe)
-m_I_1 = lme4.lmer(TRAITvalue + '~ 1 + Diet*Event +  (1|ID)', data= r_dataframe)
-print(stats.anova(m_I_1, m_I_E))
-
-
-# => modelFull has lower AIC so better model. Use (Event|ID)
-# => Difference in AIC's is ~5 so significantly better.
-
-# Step 2: Testing stat significance of fixed interaction term
-m_I_E = lme4.lmer( TRAITvalue + ' ~ 1 + Diet*Event +  (Event|ID)', REML= False, data = r_dataframe)
-m_noI_E = lme4.lmer( TRAITvalue +  ' ~ 1 + Diet + Event + (Event|ID)', REML=False, data = r_dataframe)
-print(pb.KRmodcomp(m_I_E, m_noI_E))
-# => p.value = 0.7288 Removing interaction makes no difference.
-# Stick with main effects model
-print(stats.anova(m_noI_E, m_I_E))
-# modelNoInt also has loweer AIC and BIC, confirming better fit to data without  interaction
-
-# Step 3: Testing significance of main fixed effects
-print(lmerTest.anova_lmerModLmerTest(m_noI_E))
-# => Main effects are not significantly different to 0.
-
-print(stats.drop1(m_noI_E, test="Chisq"))
-# => Diet is not having an effect on the model.
-# =>   There is a drop in AIC  by removing it (model gets better)
-#        and its LRT of full to drop1(Diet) is 0.32 with p-value 0.8256
-
-
-
-
-#-----------------------------------------------
-#  Analysis of potassium Trait
-#  Conclusion: Diet is having no impact on sodium
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-TRAITvalue = "potassium"
-
-# Step 1: Testing if (Event|ID) or (1|ID) is better model
-m_I_E = lme4.lmer(  TRAITvalue + '~ 1 + Diet*Event +  (Event|ID)', data= r_dataframe)
-m_I_1 = lme4.lmer(TRAITvalue + '~ 1 + Diet*Event +  (1|ID)', data= r_dataframe)
-print(stats.anova(m_I_1, m_I_E))
-# => m_I_1 much better model based on lower AIC
-
-
-# Step 2: Testing stat significance of fixed interaction term
-m_I_1 = lme4.lmer( TRAITvalue + ' ~ 1 + Diet*Event +  (1|ID)', REML= False, data = r_dataframe)
-m_noI_1 = lme4.lmer( TRAITvalue +  ' ~ 1 + Diet + Event + (1|ID)', REML=False, data = r_dataframe)
-print(pb.KRmodcomp(m_I_1, m_noI_1))
-print(stats.drop1(m_I_1, test="Chisq"))
-#print(stats.confint(m_I_1))
-
-# => Ftest for interaction term is p-value of 0.107.  Non-significance.
-# => very slight improvement in  AIC by removing interaction main effect.
-# => LRT have p value of 0.094
-# Further confirmed by looking at confidence intervals for interaction effects. All intervals include 0.
-#robjects.globalenv["mymod"] = m_I_1
-#robjects.r('''
-#library(lme4)
-#print(confint(mymod))
-#''')
-#exit()
-
-
-### !!!!!! THIS needs further testing ... not sure if Diet is sign. Do other tests.
-
-# Step 3: Testing significance of main fixed effects
-print(lmerTest.anova_lmerModLmerTest(m_noI_1))
-# => Diet pval 0.051,  Event pval 0.00386
-print(stats.drop1(m_noI_1, test="Chisq"))
-# => Diet and Event both significant here.
-# Further confirmation - bootstrap
-m_noI_1 = lme4.lmer( TRAITvalue +  ' ~ 1 + Diet + Event + (1|ID)', REML=False, data = r_dataframe)
-m_noInoD_1 = lme4.lmer( TRAITvalue +  ' ~ 1 + Event + (1|ID)', REML=False, data = r_dataframe)
-#### print(pb.PBmodcomp(m_noI_1, m_noInoD_1, nsim=50000,seed=31221743))
-# => Dropping Diet is significant. It should be kept in the model
-
-# Step 4: Calculation of contrasts.
-
-diet_emm = emmeans.emmeans(m_noI_1, "Diet")
-print(diet_emm)  # confidence intervals
-print(emmeans.contrast(diet_emm, 'tukey'))
-
-# contrast              estimate   SE   df t.ratio   p.value
-# Diet I  - Diet  II    -0.1201 0.0826 16.1  -1.455  0.3379
-# Diet I  - Diet III    -0.1972 0.0826 16.1  -2.388  0.0718
-# Diet II - Diet III    -0.0771 0.0813 15.5  -0.948  0.6193
-
-
-
-
-#-----------------------------------------------
-#  Analysis of chloride Trait
-#  Conclusion: Diet is having no impact on sodium
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-TRAITvalue = "chloride"
-
-# Step 1: Testing if (Event|ID) or (1|ID) is better model
-m_I_E = lme4.lmer(  TRAITvalue + '~ 1 + Diet*Event +  (Event|ID)', data= r_dataframe)
-m_I_1 = lme4.lmer(TRAITvalue + '~ 1 + Diet*Event +  (1|ID)', data= r_dataframe)
-print(stats.anova(m_I_1, m_I_E))
-# => m_I_1 better model based on lower AIC
-
-
-
-# Step 2: Testing stat significance of fixed interaction term
-m_I_1 = lme4.lmer( TRAITvalue + ' ~ 1 + Diet*Event +  (1|ID)', REML= False, data = r_dataframe)
-m_noI_1 = lme4.lmer( TRAITvalue +  ' ~ 1 + Diet + Event + (1|ID)', REML=False, data = r_dataframe)
-print(pb.KRmodcomp(m_I_1, m_noI_1))
-print(stats.drop1(m_I_1, test="Chisq"))
-#print(stats.confint(m_I_1))
-
-# => Ftest for interaction term is p-value of 0.85.  Non-significance.
-# =>  improvement in  AIC by removing interaction main effect.
-# => LRT have p value of 0.8593
-# Further confirmed by looking at confidence intervals for interaction effects. All intervals include 0.
-robjects.globalenv["mymod"] = m_I_1
-robjects.r('''
-library(lme4)
-print(confint(mymod))
-''')
-
-
-
-
-# Step 3: Testing significance of main fixed effects
-# Event high signif, Diet insignif
-print(lmerTest.anova_lmerModLmerTest(m_noI_1))
-# => Diet pval 0.3051,  Event pval 0.000000235
-
-print(stats.drop1(m_noI_1, test="Chisq"))
-# => LRT: non-signif for Diet, highly signif for Event
-
-
-# Further confirmation - bootstrap
-m_noI_1 = lme4.lmer( TRAITvalue +  ' ~ 1 + Diet + Event + (1|ID)', REML=False, data = r_dataframe)
-m_noInoD_1 = lme4.lmer( TRAITvalue +  ' ~ 1 + Event + (1|ID)', REML=False, data = r_dataframe)
-#### print(pb.PBmodcomp(m_noI_1, m_noInoD_1, nsim=1000,seed=31221743))
-# => Dropping Diet is NOT significant. It can be dropped from the model
-
-
-# Step 4: Calculation of contrasts.
-
-diet_emm = emmeans.emmeans(m_noI_1, "Diet")
-print(diet_emm)  # confidence intervals
-print(emmeans.contrast(diet_emm, 'tukey'))
-
-# => Nothing doing on with Diet contrasts
-# contrast           estimate  SE   df t.ratio p.value
-# Diet I - Diet II     -0.972 1.1 16.0  -0.882  0.6591
-# Diet I - Diet III     0.549 1.1 16.0   0.498  0.8731
-# Diet II - Diet III    1.521 1.1 15.9   1.385  0.3719
 
 
 
