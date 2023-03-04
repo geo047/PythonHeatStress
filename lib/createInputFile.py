@@ -34,6 +34,23 @@ def read_clean():
     #print(mydf.groupby('Event').count()) #  the numbers check out.
 
 #    mydf.to_csv('/home/g/PyCharm/PythonHeatStress/Data/cleanedData.csv', index=False)
+    mydf.columns = mydf.columns.str.replace(' ', '')
+    mydf.columns = mydf.columns.str.replace(':', '_')
+    mydf.columns = mydf.columns.str.replace('-', '_')
+
+    # Decided to standardize colums for easier comparison later on
+    # Standardizing columns
+    print(mydf.head())
+    exit()
+
+
+    normalized_mydf = (mydf - mydf.mean()) / mydf.std()
+    print(normalized_mydf.head())
+    exit()
+
+
+
+
 
 
     return mydf
@@ -49,3 +66,10 @@ def read_add_covariates(df, trait):
     df = pd.merge(df,time2df, how="left", on="ID")
 
     return df
+
+
+def make_2_events(df):
+    # removing Sample Time points 1 and 2 from dataframe
+    df = df.query('~(Sample == 1 | Sample == 2)')
+    return df
+

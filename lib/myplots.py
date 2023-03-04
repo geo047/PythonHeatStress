@@ -62,15 +62,28 @@ def my_individual_plot(df, traitnme:str):
             ]
 
 
+    #df = df[['Diet','ID']].drop_duplicates()
+    #print(df)
 
-
-    g = sns.relplot(data=df, x="Sample", y="sodium", hue="ID", kind="line",
-                    row="Diet", col="Event", height = 5, aspect=0.75,
+    g = sns.relplot(data=df, x="Sample", y=traitnme, hue="ID",
+                    row="Diet", height = 5, aspect=0.75, style="ID", kind="line",
                     row_order=['Diet I', 'Diet II', 'Diet III'], markers="o",
-                    col_order=['PreHeat', 'Heat', "Recovery"], linewidth=3,
+                    linewidth=3,
                     hue_order=myid, palette=sns.color_palette("tab10", 3),
-                    facet_kws={"margin_titles": True}
+                    facet_kws={"margin_titles": True},
+                    dashes = [(1,1),(2,1),(1,1),(1,1),(3,1),(2,1),(2,1),(3,1),(4,1),(3,1),(4,1),(4,1) ]
                     )
+
+    # g = sns.relplot(data=df, x="Sample", y=traitnme, hue="ID", kind="line",
+    #                 row="Diet", col="Event", height = 5, aspect=0.75,
+    #                 row_order=['Diet I', 'Diet II', 'Diet III'], markers="o",
+    #                 col_order=['PreHeat', 'Heat', "Recovery"], linewidth=3,
+    #                 hue_order=myid, palette=sns.color_palette("tab10", 3),
+    #                 facet_kws={"margin_titles": True}
+    #                 )
+
+
+
 
     lenofarray = len(df['Sample'].unique())
     lenofarray += 1
