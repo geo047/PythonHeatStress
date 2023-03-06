@@ -17,7 +17,7 @@
 
 
 
-
+import numpy as np
 import rpy2.robjects as robjects
 from rpy2.robjects import pandas2ri
 from rpy2.robjects.packages import importr, data
@@ -66,58 +66,71 @@ def my_analysisII(TRAITvalue):
 
 
     mydf = read_clean()
+
     df = read_add_covariates(df=mydf, trait=TRAITvalue)
     mydf = make_2_events(df=df)
-
-
-
     r_dataframe = pandas2ri.py2rpy(mydf)  # convert pandas into R dataframe
 
     robjects.globalenv["my_r_df"] = r_dataframe
     robjects.globalenv["tnme"] = TRAITvalue
 
-    robjects.r('''
-    library(lme4)
-    library(emmeans)
-    library(lmerTest)
-    frm = as.formula(paste(tnme , ' ~ 1 + timecov1 + timecov2 + Diet*Event + (1|ID)'))
+    frm = stats.as_formula(TRAITvalue + ' ~ 1 + timecov1 + timecov2 + Diet*Event + (1|ID)')
+    heatlme = lme4.lmer(frm, data=r_dataframe)
+    frm = stats.as_formula( ' ~ Diet:Event')
 
+    #    em = emmeans.emmeans(object=heatlme, specs='~ Diet:Event')
+    em = emmeans.emmeans(object=heatlme, specs=frm)
 
+    D1H = np.array([1,0,0,0,0,0])
+    D2H = np.array([0,1,0,0,0,0])
+    D3H = np.array([0,0,1,0,0,0])
+    D1R = np.array([0,0,0,1,0,0])
+    D2R = np.array([0,0,0,0,1,0])
+    D3R = np.array([0,0,0,0,0,1])
+    Rvec = np.array([0,0,0,1,1,1])
+    Hvec = np.array([1,1,1,0,0,0])
 
+    conlist = robjects.ListVector({
+                    "Recovery - Heat" : Rvec - Hvec,
+                    "Heat: D1 - D3" : D1H - D3H,
+                    "Heat: D2 - D3" : D2H - D3H,
+                    "Recovery: D1 - D3" : D1R - D3R,
+                    "Recovery: D2 - D3" : D2R - D3R })
 
-    heatlme  = lmer(frm, data = my_r_df )
-    options(width=400)
-     em = emmeans(heatlme,   specs = ~ Diet:Event)  
-     #print(em)
-     D1H = c(1,0,0,0,0,0)
-     D2H = c(0,1,0,0,0,0)
-     D3H = c(0,0,1,0,0,0)
-     D1R = c(0,0,0,1,0,0)
-     D2R = c(0,0,0,0,1,0)
-     D3R = c(0,0,0,0,0,1)
-     R = c(0,0,0,1,1,1)
-     H = c(1,1,1,0,0,0)
+    ct = emmeans.contrast(em, method=conlist )  # ct of type methods.RS4
+    ctnew = base.as_data_frame(ct) # needed to convert methods.RS4 to R dataframe to convert into pandas dataframe
+    fd = pandas2ri.rpy2py_dataframe(ctnew)
+    fd = fd.loc[:,('contrast','estimate')]
+    fd['trait'] = TRAITvalue
 
-     ct = contrast(em, 
-     # method=list("Heat: D1 - D3"=D1H - D3H,
-     #             "Heat: D2 - D3" = D2H - D3H,
-     #             "Recovery: D1 - D3"=D1R - D3R,
-     #             "Recovery: D2 - D3" = D2R - D3R) )
- 
-     method=list("Recovery - Heat" = R - H,  
-                 "Heat: D1 - D3"=D1H - D3H,
-                 "Heat: D2 - D3" = D2H - D3H))
-                  "Recovery: D1 - D3"=D1R - D3R,
-                 "Recovery: D2 - D3" = D2R - D3R) )
+    # robjects.r('''
+    # print("IN HERER oobs")
+    #  library(lme4)
+    #  library(emmeans)
+    #  library(lmerTest)
+    #  frm = as.formula(paste(tnme , ' ~ 1 + timecov1 + timecov2 + Diet*Event + (1|ID)'))
+    #  heatlme  = lmer(frm, data = my_r_df )
+    #  options(width=400)
+    #  em = emmeans(heatlme,   specs = ~ Diet:Event)
+    #  D1H = c(1,0,0,0,0,0)
+    #  D2H = c(0,1,0,0,0,0)
+    #  D3H = c(0,0,1,0,0,0)
+    #  D1R = c(0,0,0,1,0,0)
+    #  D2R = c(0,0,0,0,1,0)
+    #  D3R = c(0,0,0,0,0,1)
+    #  R = c(0,0,0,1,1,1)
+    #  H = c(1,1,1,0,0,0)
+    #
+    #  ct = contrast(em,
+    #   method=list("Recovery - Heat" = R - H,
+    #               "Heat: D1 - D3"=D1H - D3H,
+    #               "Heat: D2 - D3" = D2H - D3H,
+    #               "Recovery: D1 - D3"=D1R - D3R,
+    #               "Recovery: D2 - D3" = D2R - D3R) )
+    #  print(ct)
+    #
+    #
+    # ''')
+    #
 
-                                    
-     print(ct)
- #   emm1 = emmeans(heatlme, ~Diet|Event)
- #    print(pairs(emm1))
-#     print(summary(heatlme)["coefficients"])
-    
-    ''')
-
-    return print("Completed ...")
-
-
+    return fd

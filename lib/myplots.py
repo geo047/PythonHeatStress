@@ -1,8 +1,9 @@
 # Plotting functions
-import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 import numpy as np
+from matplotlib import pyplot as plt, patches
+import matplotlib
 
 
 def my_plot(df, traitnme:str):
@@ -169,16 +170,76 @@ def my_individual_plot(df, traitnme:str):
     exit()
 
 
+def rect_plot(df, min_neg, max_pos):
+    plt.rcParams["figure.figsize"] = [7.00, 7.00]
+    plt.rcParams["figure.autolayout"] = True
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+
+    #          Heat      Recovery
+    #        +---------------------+
+    #   D1   | D1-D3   |  D1-D3    |
+    #        |-------  + ----------|
+    #   D2   | D2-D3   |  D2-D3    |
+    #        +---------------------+
+    #  Upper Left
+    val = df.iat[1, 1]
+    if val < 0:
+        cmap = matplotlib.pyplot.get_cmap('Greys')
+        rgba = cmap(val/min_neg)
+        matplotlib.pyplot.text(x=-4, y=2, s="Heat: D1 - D3", fontsize=18, color="blue")
+
+    else:
+        cmap = matplotlib.pyplot.get_cmap('Reds')
+        rgba = cmap(val/max_pos)
+        matplotlib.pyplot.text(x=-4, y=2, s="Heat: D1 - D3", fontsize=18, color="blue")
+    rectD1H = patches.Rectangle((-5, 0), 5, 5, facecolor= rgba , linewidth=1)
+
+
+    val = df.iat[3, 1]
+    if val < 0:
+        cmap = matplotlib.pyplot.get_cmap('Greys')
+        rgba = cmap(val/min_neg)
+        matplotlib.pyplot.text(x=1, y=2, s="Rec: D1 - D3", fontsize=18, color="blue")
+    else:
+        cmap = matplotlib.pyplot.get_cmap('Reds')
+        rgba = cmap(val/max_pos)
+        matplotlib.pyplot.text(x=1, y=2, s="Rec: D1 - D3", fontsize=18, color="blue")
+    rectD1R = patches.Rectangle((0, 0), 5, 5, facecolor=rgba, linewidth=1)
+
+    val = df.iat[2, 1]
+    if val < 0:
+        cmap = matplotlib.pyplot.get_cmap('Greys')
+        rgba = cmap(val/min_neg)
+        matplotlib.pyplot.text(x=-4, y=-2, s="Heat: D2 - D3", fontsize=18, color="blue")
+    else:
+        cmap = matplotlib.pyplot.get_cmap('Reds')
+        rgba = cmap(val/max_pos)
+        matplotlib.pyplot.text(x=-4, y=-2, s="Heat: D2 - D3", fontsize=18, color="blue" )
+    rectD2H = patches.Rectangle((-5, -5), 5, 5, facecolor=rgba, linewidth=1)
 
 
 
+    val = df.iat[4, 1]
+    if val < 0:
+        cmap = matplotlib.pyplot.get_cmap('Greys')
+        rgba = cmap(val/min_neg)
+        matplotlib.pyplot.text(x=1, y=-2, s="Rec: D2 - D3", fontsize=18, color= "blue")
+    else:
+        cmap = matplotlib.pyplot.get_cmap('Reds')
+        rgba = cmap(val/max_pos)
+        matplotlib.pyplot.text(x=1, y=-2, s="Rec: D2 - D3", fontsize=18, color= "blue")
+    rectD2R = patches.Rectangle((0, -5), 5, 5, facecolor=rgba, linewidth=1)
 
-#
-# mydfplt = mydf.pivot(index='Sample', columns='ID', values='sodium')
-# mydfplt.sort_values(by='Sample', inplace=True)
-#
-# print(mydfplt.head(5))
-#
-# mydfplt.plot(kind="line")
-# plt.show()
+    ax.add_patch(rectD1H)
+    ax.add_patch(rectD1R)
+
+    ax.add_patch(rectD2H)
+    ax.add_patch(rectD2R)
+
+    plt.xlim([-5, 5])
+    plt.ylim([-5, 5])
+    plt.title(df.trait[0])
+    plt.axis("off")
+    plt.show()
 

@@ -7,6 +7,8 @@ import numpy as np
 
 def read_clean():
 
+
+
     # Read data sheets
     filenm = "/home/g/PyCharm/PythonHeatStress/Data/acidbu22.xlsx"
     mydf = pd.read_excel(filenm, sheet_name='Sheet1',
@@ -21,7 +23,29 @@ def read_clean():
     mydf.query('~(Sample_Date=="2022-09-22" or Sample_Date > "2022-10-17") ', inplace=True)
     mydf.Sample -= 1 # reindexing Sample day number to start from 1.
 
+    # Add the 5 additional blood traits
 
+
+
+    sheetname = ["pH", "pCO2", 'pO2','BE','HCO3']
+    filenm = "/home/g/PyCharm/PythonHeatStress/Data/rawdata230223.xlsx"
+
+    for ii in sheetname:
+        df = pd.read_excel(filenm, sheet_name=ii,
+                              na_values=".", skiprows=1, header=0)
+        df.dropna(how="all", inplace=True)
+        df.rename(columns={'Unnamed: 1':'ID'}, inplace=True)
+        df.ID = df.ID.astype('int')
+        df = df.astype({'ID': 'string'})
+
+
+        df = df.melt(id_vars= df.columns[1], value_vars=df.columns[4:20] )
+        df.rename(columns={'variable':'Sample_Date', 'value':ii}, inplace=True)
+
+        # remove rows with these dates 2022-09-22, and after 17/10
+        df.query('~(Sample_Date=="2022-09-22" or Sample_Date > "2022-10-17") ', inplace=True)
+
+        mydf = pd.merge(mydf, df, how='left', on=['ID', 'Sample_Date'])
     # create Event column
     conditions = [
         mydf.Sample_Date <= '2022-10-01',
@@ -40,15 +64,27 @@ def read_clean():
 
     # Decided to standardize colums for easier comparison later on
     # Standardizing columns
-    print(mydf.head())
-    exit()
 
 
-    normalized_mydf = (mydf - mydf.mean()) / mydf.std()
-    print(normalized_mydf.head())
-    exit()
+
+    cols = mydf.columns
+    cols = cols[:-1]
+    cols = cols[4:]
 
 
+
+    norm_mydf = (mydf.loc[:,cols] - mydf.loc[:,cols].mean(numeric_only=True)) / \
+                             mydf.loc[:,cols].std(numeric_only=True)
+
+    ### COMMENT OUT IF YOU WANT untransformed TRAIT DATA
+    mydf = pd.concat([mydf.iloc[:,0:4], norm_mydf.iloc[:], mydf.iloc[:,-1:]], axis=1)
+
+
+
+    print(f'------------------------------------------------------------------------------')
+    print(f'WARNING: Normalized values are being used.')
+    print(f'         Adjust return statement of read_clean() function to change behavior')
+    print(f'------------------------------------------------------------------------------')
 
 
 

@@ -27,8 +27,11 @@ mydf = read_clean()
 # # obtained by first running createInputFile.py
 # mydf = pd.read_csv('/home/g/PyCharm/PythonHeatStress/Data/cleanedData.csv')
 # # extracting names of the traits in mydf. Removing the fixed effects cols.
-cols = mydf.columns.values
-cols= np.delete( cols, [0,1,2,3,29] )  # trait names from columns of dataframe
+cols = ['sodium', 'potassium' ,'chloride',
+ 'bicarbonate' ,'NA_Kratio' ,'aniongap' ,'glucose_serum', 'urea' ,'creatinine',
+ 'calcium' ,'phospate' ,'CA_Pratio' ,'protein_total' ,'albumin' ,'globulin',
+ 'A_Gratio' ,'billirubin_total' ,'ALP' ,'AST' ,'CK', 'cholesterol' ,'Magnesium',
+ 'GammaGT', 'B_hydroxybutyrate' ,'GLDH', 'pH' ,'pCO2' ,'pO2' ,'BE' ,'HCO3']
 
 
 
@@ -85,10 +88,22 @@ from myfunctions import my_analysis, my_analysisII
 
 
 
+df_em = pd.DataFrame(columns=['contrast','estimate','trait'])
 
 
-for ii in cols:
-  print(f'TRAIT VALUE IS ... {ii}  ..... ')
-  my_analysisII(TRAITvalue=ii )
+
+for ii in cols[0:2]:
+    print(f'TRAIT VALUE IS ... {ii}  ..... ')
+
+    tempdf = my_analysisII(TRAITvalue=ii )
+    df_em = pd.concat([df_em, tempdf], axis=0) # row concat
+
+min_neg = df_em.estimate.min()
+max_pos = df_em.estimate.max()
 
 
+for ii in cols[0:2]:
+
+ dftrait = df_em[df_em.trait == ii]
+ print(dftrait)
+ myplots.rect_plot(dftrait, min_neg, max_pos)
