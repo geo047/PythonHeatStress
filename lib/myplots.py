@@ -189,15 +189,12 @@ def my_individual_plot(df, traitnme:str):
 #     return ax
 
 def rect_plot(fig, ax, df, min_neg, max_pos):
-
-
-#    fig, ax = plt.subplots()
-    # create simple line plot
-#    ax.plot([0, 10], [0, 10])
+    # Plot superceded. Too difficult to interpret differences. Contrast
+    # diff could be due to aa number of different situations in the estimates.
+    # Going for bar plots of straight Diet level estimates instead. See below
 
     plt.rcParams["figure.figsize"] = [7.00, 7.00]
     plt.rcParams["figure.autolayout"] = True
-
 
     #          Heat      Recovery
     #        +---------------------+
@@ -264,3 +261,41 @@ def rect_plot(fig, ax, df, min_neg, max_pos):
     plt.axis("off")
 
     return fig
+
+
+def my_bar_plot(df, eventType):
+    # bar plot of standardized estimates of Diet 1, II, and III for Event type
+    X = df.trait.unique()
+    D1 = df['emmean'][(df.Diet == "Diet I") & (df.Event == eventType)]
+    D2 = df['emmean'][(df.Diet == "Diet II") & (df.Event == eventType)]
+    D3 = df['emmean'][(df.Diet == "Diet III") & (df.Event == eventType)]
+
+
+
+    # Ygirls = [10, 20, 20, 40]
+    # Zboys = [20, 30, 25, 30]
+
+    X_axis = np.arange(len(X))
+
+    # Set position of bar on X axis
+    barWidth = 0.25
+    br1 = np.arange(len(X))
+    br2 = [x + barWidth for x in br1]
+    br3 = [x + barWidth for x in br2]
+
+
+    plt.bar(br1, D1, width=barWidth, label='Diet I')
+    plt.bar(br2, D2, width=barWidth, label='Diet II')
+    plt.bar(br3, D3, width=barWidth, label='Diet II')
+
+    plt.xticks(X_axis, X)
+    plt.xlabel("Responses")
+    plt.ylabel("Standardized Effect Size")
+    plt.title( eventType + ' Event', fontsize = 16)
+    plt.legend()
+    plt.xticks(rotation=90)  # Rotates X-Axis Ticks by 45-degrees
+
+    filenm = "/home/g/PyCharm/PythonHeatStress/fig" + eventType + ".pdf"
+    plt.savefig(filenm)
+
+    #plt.show()

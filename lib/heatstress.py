@@ -74,69 +74,74 @@ cols = ['sodium', 'potassium' ,'chloride',
 # r_dataframe = pandas2ri.py2rpy(pd_df)
 # print(r_dataframe)
 
-from myfunctions import my_analysis, my_analysisII
+from myfunctions import my_analysis, my_analysisII, my_analysisIII
 
 # print(cols)
 #
 # for ii in cols:
 #   print(f'Trait Value is .... {ii}')
 #   my_analysis(TRAITvalue=ii)
-
 # => Found that there were no significant contrasts in PreHeat.
 # Going to implement Ross's idea.
-
 #myplots.my_individual_plot(df=mydf, traitnme = "Magnesium")
-#exit()
 
 
 
-df_em = pd.DataFrame(columns=['contrast','estimate','trait'])
+### Decide not to do the analyses as contrasts as to difficult to interpret the
+### contrasts. Sticking to straight estimates (see below)
+# df_em = pd.DataFrame(columns=['contrast','estimate','trait'])
+# for ii in cols:
+#     #    print(f'TRAIT VALUE IS ... {ii}  ..... ')
+#
+#     tempdf = my_analysisII(TRAITvalue=ii )
+#     df_em = pd.concat([df_em, tempdf], axis=0) # row concat
+#
+# min_neg = df_em.estimate.min()
+# max_pos = df_em.estimate.max()
+#
+# fig = plt.figure()
+# counter = 1
+# for ii in cols[0:16]:
+#     print(f'TRAIT VALUE IS ... {ii}  ..... ')
+#
+#     dftrait = df_em[df_em.trait == ii]
+#     ax = fig.add_subplot(4,4, counter)
+#     myplots.rect_plot(fig, ax, dftrait, min_neg, max_pos)
+#     counter += 1
+#
+# filenm = "/home/g/PyCharm/PythonHeatStress/fig1.pdf"
+# plt.savefig(filenm)
+# #plt.show()
+#
+# fig = plt.figure()
+# counter = 1
+# for ii in cols[16:]:
+#     print(f'TRAIT VALUE IS ... {ii}  ..... ')
+#
+#     dftrait = df_em[df_em.trait == ii]
+#     ax = fig.add_subplot(4,4, counter)
+#     myplots.rect_plot(fig, ax, dftrait, min_neg, max_pos)
+#     counter += 1
+#
+# filenm = "/home/g/PyCharm/PythonHeatStress/fig2.pdf"
+# plt.savefig(filenm)
+#
 
+#----------------------------------------------------------------------------------------
+# 08/03/2023
+# Decided to try bar plots instead and dealing with estimates of Diets directly instead
+# of contrasts.
+#------------------------------------------------------------------------------------------
 
-
+df_em = pd.DataFrame(columns=['Diet','Event', 'emmean','trait'])
 for ii in cols:
     #    print(f'TRAIT VALUE IS ... {ii}  ..... ')
-
-    tempdf = my_analysisII(TRAITvalue=ii )
+    #  print out estimates instead of contrasts but similar to analysis above.
+    tempdf = my_analysisIII(TRAITvalue=ii )
     df_em = pd.concat([df_em, tempdf], axis=0) # row concat
 
-min_neg = df_em.estimate.min()
-max_pos = df_em.estimate.max()
+myplots.my_bar_plot(df=df_em, eventType="Heat")
 
+myplots.my_bar_plot(df=df_em, eventType="Recovery")
 
-
-
-fig = plt.figure()
-counter = 1
-for ii in cols[0:16]:
-    print(f'TRAIT VALUE IS ... {ii}  ..... ')
-
-    dftrait = df_em[df_em.trait == ii]
-    ax = fig.add_subplot(4,4, counter)
-    myplots.rect_plot(fig, ax, dftrait, min_neg, max_pos)
-    counter += 1
-
-filenm = "/home/g/PyCharm/PythonHeatStress/fig1.pdf"
-plt.savefig(filenm)
-#plt.show()
-
-
-fig = plt.figure()
-counter = 1
-for ii in cols[16:]:
-    print(f'TRAIT VALUE IS ... {ii}  ..... ')
-
-    dftrait = df_em[df_em.trait == ii]
-    ax = fig.add_subplot(4,4, counter)
-    myplots.rect_plot(fig, ax, dftrait, min_neg, max_pos)
-    counter += 1
-
-
-
-
-filenm = "/home/g/PyCharm/PythonHeatStress/fig2.pdf"
-plt.savefig(filenm)
-
-
-
-#plt.show()
+print(df_em)
