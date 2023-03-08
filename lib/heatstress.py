@@ -35,6 +35,8 @@ cols = ['sodium', 'potassium' ,'chloride',
 
 
 
+
+
 #-------------------------------------------#
 # Create  Plots over Time               #
 #-------------------------------------------#
@@ -92,8 +94,8 @@ df_em = pd.DataFrame(columns=['contrast','estimate','trait'])
 
 
 
-for ii in cols[0:2]:
-    print(f'TRAIT VALUE IS ... {ii}  ..... ')
+for ii in cols:
+    #    print(f'TRAIT VALUE IS ... {ii}  ..... ')
 
     tempdf = my_analysisII(TRAITvalue=ii )
     df_em = pd.concat([df_em, tempdf], axis=0) # row concat
@@ -102,8 +104,39 @@ min_neg = df_em.estimate.min()
 max_pos = df_em.estimate.max()
 
 
-for ii in cols[0:2]:
 
- dftrait = df_em[df_em.trait == ii]
- print(dftrait)
- myplots.rect_plot(dftrait, min_neg, max_pos)
+
+fig = plt.figure()
+counter = 1
+for ii in cols[0:16]:
+    print(f'TRAIT VALUE IS ... {ii}  ..... ')
+
+    dftrait = df_em[df_em.trait == ii]
+    ax = fig.add_subplot(4,4, counter)
+    myplots.rect_plot(fig, ax, dftrait, min_neg, max_pos)
+    counter += 1
+
+filenm = "/home/g/PyCharm/PythonHeatStress/fig1.pdf"
+plt.savefig(filenm)
+#plt.show()
+
+
+fig = plt.figure()
+counter = 1
+for ii in cols[16:]:
+    print(f'TRAIT VALUE IS ... {ii}  ..... ')
+
+    dftrait = df_em[df_em.trait == ii]
+    ax = fig.add_subplot(4,4, counter)
+    myplots.rect_plot(fig, ax, dftrait, min_neg, max_pos)
+    counter += 1
+
+
+
+
+filenm = "/home/g/PyCharm/PythonHeatStress/fig2.pdf"
+plt.savefig(filenm)
+
+
+
+#plt.show()
