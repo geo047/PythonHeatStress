@@ -169,6 +169,8 @@ df_em['trait'] = df_em.trait.astype(str)
 df_em.loc[x, 'trait']  = ""
 
 
+
+
 print(df_em.head())
 
 filenm = "/home/g/PyCharm/PythonHeatStress/df_em.csv"
