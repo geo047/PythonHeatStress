@@ -41,7 +41,7 @@ cols = ['sodium', 'potassium' ,'chloride',
 # Create  Plots over Time               #
 #-------------------------------------------#
 #import createMeanPlots
-#exit()
+
 
 
 
@@ -51,7 +51,7 @@ cols = ['sodium', 'potassium' ,'chloride',
 ## One Way Anova of all traits
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #import oneWayANOVA
-
+#exit()
 
 
 
@@ -87,7 +87,7 @@ from myfunctions import my_analysis, my_analysisII, my_analysisIII
 
 
 
-### Decide not to do the analyses as contrasts as to difficult to interpret the
+### Decide not to do the analyses as contrasts as too difficult to interpret the
 ### contrasts. Sticking to straight estimates (see below)
 # df_em = pd.DataFrame(columns=['contrast','estimate','trait'])
 # for ii in cols:
@@ -133,15 +133,45 @@ from myfunctions import my_analysis, my_analysisII, my_analysisIII
 # of contrasts.
 #------------------------------------------------------------------------------------------
 
-df_em = pd.DataFrame(columns=['Diet','Event', 'emmean','trait'])
+df_em = pd.DataFrame(columns=['Diet','Event', 'emmean','SE', 'lower.CL', 'upper.CL', 'trait'])
 for ii in cols:
     #    print(f'TRAIT VALUE IS ... {ii}  ..... ')
     #  print out estimates instead of contrasts but similar to analysis above.
     tempdf = my_analysisIII(TRAITvalue=ii )
+    tempdf['trait'] = ii
+
     df_em = pd.concat([df_em, tempdf], axis=0) # row concat
 
-myplots.my_bar_plot(df=df_em, eventType="Heat")
+myplots.my_bar_plot(df=df_em, eventType="Event2")
 
-myplots.my_bar_plot(df=df_em, eventType="Recovery")
+myplots.my_bar_plot(df=df_em, eventType="Event3")
 
+print(df_em.columns)
+
+df_em = df_em.iloc[:, [ 6, 1, 0, 2, 3, 4, 5 ]]
+
+
+
+df_em = df_em.round(3)
+
+# Convert categorical variable to a string and replace
+# duplicate with string value
+
+# Has to be done in this order. Event first, then trait  for
+# duplicate removal.
+x =  df_em.loc[:,['trait','Event']].duplicated()
+df_em.Event = df_em.Event.astype(str)
+df_em.loc[x, 'Event'] = ""
+
+
+x =  df_em.trait.duplicated()
+df_em['trait'] = df_em.trait.astype(str)
+df_em.loc[x, 'trait']  = ""
+
+
+print(df_em.head())
+
+filenm = "/home/g/PyCharm/PythonHeatStress/df_em.csv"
+df_em.to_csv(filenm, index=False)
 print(df_em)
+

@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt, patches
 import matplotlib
 
 
-def my_plot(df, traitnme:str):
+def my_plot(df, traitnme:str, plottype:str):
     sns.set(font_scale=0.5)
     sns.set_style('ticks')
     #sns.set_palette("bright")
@@ -15,16 +15,24 @@ def my_plot(df, traitnme:str):
 
     # Use palplot and pass in the variable:
 
-    sp = sns.lineplot(data=df, x='Sample', y=traitnme, hue='Diet', errorbar=('se', 1.96),
-                      hue_order=['diet I', 'diet II', 'diet III'], alpha=0.925, palette=mypal, lw=3)
-    sp.set(xlabel="collection day", ylabel= ('mean within diet')   , title= traitnme )
+    sp = sns.lineplot(data=df, x='DayNumber', y=traitnme, hue='Diet', errorbar=('se', 1.96),
+                      hue_order=['Diet I', 'Diet II', 'Diet III'], alpha=0.925, palette=mypal, lw=3)
+    sp.set(xlabel="Day Number", ylabel= ('Mean within Diet')   , title= traitnme )
     sp.grid(False)
     handles, labels = sp.get_legend_handles_labels()
     sp.legend(handles=handles[0:], labels=labels[0:])
     plt.legend(loc='upper right')
     plt.setp(sp.get_legend().get_texts(), fontsize='4')
-    plt.axvline(x=2.5, linestyle='dashed')
-    plt.axvline(x=7.5, linestyle='dashed')
+    plt.axvline(x=4.5, linestyle='dashed')
+    plt.axvline(x=11.5, linestyle='dashed')
+    if plottype == "y":
+        sp.set(xlabel=None)
+    if plottype == "x":
+        sp.set(xlabel=None)
+    if plottype == "x":
+        sp.set(xlabel=None)
+
+    #plt.show()
     return sp
 
 
@@ -64,7 +72,7 @@ def my_individual_plot(df, traitnme:str):
     g.fig.suptitle(traitnme, fontsize=16)
     g.fig.subplots_adjust(top=0.9, bottom=0.1)
     g.legend.remove()
-    plt.show()
+    #plt.show()
 
 
 
@@ -111,7 +119,7 @@ def my_individual_plot(df, traitnme:str):
     sp.grid(False)
     sp.get_legend().remove()
 
-    plt.show()
+    #plt.show()
 
 
 
@@ -297,5 +305,6 @@ def my_bar_plot(df, eventType):
 
     filenm = "/home/g/PyCharm/PythonHeatStress/fig" + eventType + ".pdf"
     plt.savefig(filenm)
+
 
     #plt.show()

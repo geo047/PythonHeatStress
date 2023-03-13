@@ -7,21 +7,25 @@ import numpy as np
 
 def read_clean():
 
-
-
     # Read data sheets
     filenm = "/home/g/PyCharm/PythonHeatStress/Data/acidbu22.xlsx"
     mydf = pd.read_excel(filenm, sheet_name='Sheet1',
                           na_values=".")
+    # Set extreme value to missing
+    mydf.query('CK > 4000')['CK'] == None
+
     mydf.columns = mydf.columns.str.strip() # remove pesky spaces in col names
 
     mydf.rename(columns = {'treatment':'Diet'}, inplace=True)
     mydf.sort_values(by=['ID', 'Sample_Date', 'Diet'], inplace=True)
     mydf = mydf.astype( {'ID':'string', 'Sample':'int', 'Diet':'string'}  )
+
+
     mydf['Diet'].replace({'trt_1':'Diet I', 'trt_2':'Diet II','trt_3':'Diet III'}, inplace=True)
     # remove rows with these dates 2022-09-22, and after 17/10
     mydf.query('~(Sample_Date=="2022-09-22" or Sample_Date > "2022-10-17") ', inplace=True)
-    mydf.Sample -= 1 # reindexing Sample day number to start from 1.
+#    After talking to Gene, she wanted actually day of trial
+#    mydf.Sample-= 1 # reindexing Sample day number to start from 1.
 
     # Add the 5 additional blood traits
 
@@ -53,7 +57,7 @@ def read_clean():
         mydf.Sample_Date > '2022-10-08'
     ]
 
-    values = ['PreHeat', 'Heat', 'Recovery']
+    values = ['Event1', 'Event2', 'Event3']
     mydf['Event'] = np.select(conditions, values, default=None)
     #print(mydf.groupby('Event').count()) #  the numbers check out.
 
@@ -62,22 +66,28 @@ def read_clean():
     mydf.columns = mydf.columns.str.replace(':', '_')
     mydf.columns = mydf.columns.str.replace('-', '_')
 
+
+    # Create lookup table mapping dates to day of trial
+    dts = mydf.Sample_Date.unique()
+
+    lookup = pd.DataFrame({'Sample_Date' :  dts,
+                           'DayNumber' : [0,4,7,8,9,10,11,12,14,16,18,20] } )
+    mydf = pd.merge(mydf, lookup, how='left', on = 'Sample_Date')
+
+
+
     # Decided to standardize colums for easier comparison later on
     # Standardizing columns
-
-
 
     cols = mydf.columns
     cols = cols[:-1]
     cols = cols[4:]
 
-
-
     norm_mydf = (mydf.loc[:,cols] - mydf.loc[:,cols].mean(numeric_only=True)) / \
                              mydf.loc[:,cols].std(numeric_only=True)
 
     ### COMMENT OUT IF YOU WANT untransformed TRAIT DATA
-    mydf = pd.concat([mydf.iloc[:,0:4], norm_mydf.iloc[:], mydf.iloc[:,-1:]], axis=1)
+    #  mydf = pd.concat([mydf.iloc[:,0:4], norm_mydf.iloc[:], mydf.iloc[:,-1:]], axis=1)
 
 
 

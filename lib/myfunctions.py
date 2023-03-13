@@ -143,7 +143,7 @@ def my_analysisIII(TRAITvalue):
     with localconverter(ro.default_converter + pandas2ri.converter):
         fd = robjects.conversion.get_conversion().rpy2py(em)  # conver R dataframe to pandas dataframe
 
-    fd = fd.loc[:, ('Diet', 'Event', 'emmean')]
+    fd = fd.loc[:, ('Diet', 'Event', 'emmean', 'SE', 'lower.CL', 'upper.CL')]
     fd['trait'] = TRAITvalue
 
     return fd
