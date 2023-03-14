@@ -115,7 +115,7 @@ def read_add_covariates(df, trait):
 
 
 def make_2_events(df):
-    # removing Sample Time points 1 and 2 from dataframe
-    df = df.query('~(Sample == 1 | Sample == 2)')
+    # removing PreHEat Event
+    df = df.query('~(Event== "Event1")')
     return df
 

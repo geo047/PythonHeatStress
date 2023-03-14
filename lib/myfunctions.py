@@ -36,30 +36,70 @@ nlme =     importr('nlme')
 pb =       importr('pbkrtest')
 printr =    robjects.r('print')
 
-
 def my_analysis(TRAITvalue):
+    # Model Building
 
     mydf = read_clean()
-
+    df = read_add_covariates(df=mydf, trait=TRAITvalue)
+#    mydf = make_2_events(df=df)
     r_dataframe = pandas2ri.py2rpy(mydf)  # convert pandas into R dataframe
-
     robjects.globalenv["my_r_df"] = r_dataframe
     robjects.globalenv["tnme"] = TRAITvalue
 
-    robjects.r('''
-    library(lme4)
-    library(emmeans)
-    frm = as.formula(paste(tnme , ' ~ 1 + Diet*Event + (1|ID)'))
-    
-    
-    heatlme  = lmer(frm, data = my_r_df )
+    frm = stats.as_formula(TRAITvalue + ' ~ 1 + Diet*Event')
+    mod1 = stats.lm(frm, data=r_dataframe)
+    print(stats.BIC(mod1))
 
-    #print(summary(heatlme))
-    emm1 = emmeans(heatlme, ~Diet|Event)
-    print(pairs(emm1))
-    ''')
+    frm = stats.as_formula(TRAITvalue + ' ~ 1 + Diet*Event + (1|ID)')
+    mod2 = lme4.lmer(frm, data=r_dataframe)
+
+    frm = stats.as_formula(TRAITvalue + ' ~ 1 + Diet*Event + (Event|ID)')
+    mod3 = lme4.lmer(frm, data=r_dataframe)
+    print(stats.anova(mod2, mod3))
+ #   print(stats.anova(mod1,mod3))
+    print(' ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ')
+
+ #   print(pb.PBmodcomp(mod3, mod2 , nsim=1000, seed=101) )
 
     return print("Completed ...")
+
+def my_pval(TRAITvalue):
+    # Calculating pvalues for levels of Event:Diet in model II
+
+    mydf = read_clean()
+    df = read_add_covariates(df=mydf, trait=TRAITvalue)
+#    mydf = make_2_events(df=df)
+    r_dataframe = pandas2ri.py2rpy(mydf)  # convert pandas into R dataframe
+    robjects.globalenv["my_r_df"] = r_dataframe
+    robjects.globalenv["tnme"] = TRAITvalue
+
+
+    frm = stats.as_formula(TRAITvalue + ' ~ 1 + Diet*Event + (1|ID)')
+    mod2 = lme4.lmer(frm, data=r_dataframe)
+
+    xx= lmerTest.summary_lmerModLmerTest(mod2)
+    #i = robjects.IntVector(10)
+    ct = xx.rx(10)   ## contains p-values
+    # Convert R list object into R dataframe and then R dataframe to pandaas dataframe
+    ctnew = base.as_data_frame(ct)  # needed to convert methods.RS4 to R dataframe to convert into pandas dataframe
+    df = pandas2ri.rpy2py_dataframe(ctnew)
+    df = df.round(3)
+
+    rowindx = df.index
+    print(type(rowindx))
+
+    exit()
+    return print("Completed ...")
+
+
+
+
+
+
+
+
+
+
 
 
 def my_analysisII(TRAITvalue):
@@ -126,6 +166,7 @@ def my_analysisIII(TRAITvalue):
     mydf = read_clean()  # create null dataframe
     df = read_add_covariates(df=mydf, trait=TRAITvalue)
     mydf = make_2_events(df=df)  # add events to dataframe
+
     r_dataframe = pandas2ri.py2rpy(mydf)  # convert pandas into R dataframe
 
     # store R objects sitting in python in R land
@@ -135,6 +176,7 @@ def my_analysisIII(TRAITvalue):
     # Fit model
     frm = stats.as_formula(TRAITvalue + ' ~ 1 + timecov1 + timecov2 + Diet*Event + (1|ID)')
     heatlme = lme4.lmer(frm, data=r_dataframe)
+
 
     # Fit emmeans model
     frm = stats.as_formula(' ~ Diet:Event')

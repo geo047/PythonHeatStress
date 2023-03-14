@@ -74,7 +74,33 @@ cols = ['sodium', 'potassium' ,'chloride',
 # r_dataframe = pandas2ri.py2rpy(pd_df)
 # print(r_dataframe)
 
-from myfunctions import my_analysis, my_analysisII, my_analysisIII
+from myfunctions import my_analysis, my_analysisII, my_analysisIII, my_pval
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~``
+#  Model Building
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# for ii, word in enumerate(cols):
+#     print(f' TRAIT VALUE = {word}')
+#     my_analysis(TRAITvalue=word)
+#
+# exit()
+
+#----------------------------------------
+# Getting p-values for Model II
+#------------------------------------
+
+for ii, word in enumerate(cols):
+    print(f' TRAIT VALUE = {word}')
+    my_pval(TRAITvalue=word)
+
+exit()
+
+
+
+
+
 
 # print(cols)
 #
@@ -143,33 +169,30 @@ for ii in cols:
     df_em = pd.concat([df_em, tempdf], axis=0) # row concat
 
 myplots.my_bar_plot(df=df_em, eventType="Event2")
-
 myplots.my_bar_plot(df=df_em, eventType="Event3")
 
-print(df_em.columns)
 
-df_em = df_em.iloc[:, [ 6, 1, 0, 2, 3, 4, 5 ]]
-
-
-
-df_em = df_em.round(3)
+df_em = df_em.iloc[:, [ 6, 1, 0, 2, 3, 4, 5 ]]  # reorganize cols to be trait first
+df_em = df_em.round(3)  # rount to 3 decimal places
 
 # Convert categorical variable to a string and replace
 # duplicate with string value
-
 # Has to be done in this order. Event first, then trait  for
 # duplicate removal.
 x =  df_em.loc[:,['trait','Event']].duplicated()
 df_em.Event = df_em.Event.astype(str)
 df_em.loc[x, 'Event'] = ""
 
-
 x =  df_em.trait.duplicated()
 df_em['trait'] = df_em.trait.astype(str)
 df_em.loc[x, 'trait']  = ""
 
-
-
+# Convert Event and Diet labels into  beter labels for report
+df_em['Event'] = df_em['Event'].replace({'Event2':'Heat',
+                        'Event3':'Recovery'})
+df_em['Diet'] = df_em['Diet'].replace({'Diet I': 'I',
+                               'Diet II': 'II',
+                               'Diet III':'III'})
 
 print(df_em.head())
 
