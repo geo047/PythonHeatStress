@@ -91,10 +91,21 @@ from myfunctions import my_analysis, my_analysisII, my_analysisIII, my_pval
 # Getting p-values for Model II
 #------------------------------------
 
+df_pval = pd.DataFrame(columns=['estimate', 'se', 'tvalue', 'pvalue', 'trait'])
+
 for ii, word in enumerate(cols):
     print(f' TRAIT VALUE = {word}')
-    my_pval(TRAITvalue=word)
+    tempdf = my_pval(TRAITvalue=word)
+    tempdf['trait'] = ii
 
+    df_pval = pd.concat([df_pval, tempdf], axis=0) # row concat
+
+filenm = "/home/g/PyCharm/PythonHeatStress/df_pval.csv"
+df_pval.to_csv(filenm, index=False)
+print(df_pval)
+
+### UP TO HERE NEED TO GET df in correct format like I did with the estimates df
+#see code below
 exit()
 
 

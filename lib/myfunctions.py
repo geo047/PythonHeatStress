@@ -10,6 +10,7 @@
 #       print(base.summary(mod1))
 #       print(nlme.ranef(mod1))   # random effect values
 #       robjects.r('print(ranef)')
+#       print(graphics.pairs(em))
 
 #
 #  Model Building and Significance Testing via
@@ -28,6 +29,7 @@ pandas2ri.activate()   # very import step !!!!!
 lme4 =     importr('lme4')
 lmerTest = importr('lmerTest')
 emmeans =  importr('emmeans')
+graphics = importr('graphics')
 base =     importr('base')
 stats =    importr('stats')
 methods =  importr('methods')
@@ -76,20 +78,42 @@ def my_pval(TRAITvalue):
 
     frm = stats.as_formula(TRAITvalue + ' ~ 1 + Diet*Event + (1|ID)')
     mod2 = lme4.lmer(frm, data=r_dataframe)
+    frm = stats.as_formula(' ~ Event:Diet')
+    em = emmeans.emmeans(object=mod2, specs=frm)
 
-    xx= lmerTest.summary_lmerModLmerTest(mod2)
-    #i = robjects.IntVector(10)
-    ct = xx.rx(10)   ## contains p-values
-    # Convert R list object into R dataframe and then R dataframe to pandaas dataframe
+    ct = emmeans.contrast(em, adjust="sidak")
     ctnew = base.as_data_frame(ct)  # needed to convert methods.RS4 to R dataframe to convert into pandas dataframe
     df = pandas2ri.rpy2py_dataframe(ctnew)
     df = df.round(3)
-
-    rowindx = df.index
-    print(type(rowindx))
-
+    print(df)
     exit()
-    return print("Completed ...")
+
+    # xx= lmerTest.summary_lmerModLmerTest(mod2)
+    # print(xx)
+    # exit()
+    # #i = robjects.IntVector(10)
+    # ct = xx.rx(10)   ## contains p-values
+    # # Convert R list object into R dataframe and then R dataframe to pandaas dataframe
+    # ctnew = base.as_data_frame(ct)  # needed to convert methods.RS4 to R dataframe to convert into pandas dataframe
+    # df = pandas2ri.rpy2py_dataframe(ctnew)
+    # df = df.round(3)
+
+    rowindx = list(df.index)
+    indices = [i for i, s in enumerate(rowindx) if ':' in s]
+    df = df.iloc[indices,:]  # grad interaction terms only
+    df.rename(columns = {
+        df.columns.values[0]: 'estimate',
+        df.columns.values[1]: 'se',
+        df.columns.values[2]: 'df',
+        df.columns.values[3]: 'tvalue',
+        df.columns.values[4]: 'pvalue'
+    }, inplace=True)
+    # remove df columns
+    df = df.loc[:, ['estimate', 'se','tvalue', 'pvalue']]
+
+
+
+    return df
 
 
 
