@@ -11,6 +11,9 @@ def read_clean():
     filenm = "/home/g/PyCharm/PythonHeatStress/Data/acidbu22.xlsx"
     mydf = pd.read_excel(filenm, sheet_name='Sheet1',
                           na_values=".")
+
+
+
     # Set extreme value to missing
     mydf.query('CK > 4000')['CK'] == None
 

@@ -133,41 +133,49 @@ def my_pval(TRAITvalue):
 
 
 def my_analysisII(TRAITvalue):
-    # Function no longer in use.
-    # Original idea was to look at contrasts of diet 1 and 2 against 3 for HEat and REcovery
-    # However, contrast differences were too difficult to interpret. Can have a positive difference
-    # for a number of different situations.  Rectangular plots not interpretable.
+    # Comparing control (Diet I) against Diet II and III
 
     mydf = read_clean()
-    df = read_add_covariates(df=mydf, trait=TRAITvalue)
-    mydf = make_2_events(df=df)
+    #df = read_add_covariates(df=mydf, trait=TRAITvalue)
+    #mydf = make_2_events(df=df)
     r_dataframe = pandas2ri.py2rpy(mydf)  # convert pandas into R dataframe
     robjects.globalenv["my_r_df"] = r_dataframe
     robjects.globalenv["tnme"] = TRAITvalue
-    frm = stats.as_formula(TRAITvalue + ' ~ 1 + timecov1 + timecov2 + Diet*Event + (1|ID)')
+    #frm = stats.as_formula(TRAITvalue + ' ~ 1 + timecov1 + timecov2 + Diet*Event + (1|ID)')
+    frm = stats.as_formula(TRAITvalue + ' ~ 1 + Diet*Event + (1|ID)')
     heatlme = lme4.lmer(frm, data=r_dataframe)
     frm = stats.as_formula( ' ~ Diet:Event')
-    #    em = emmeans.emmeans(object=heatlme, specs='~ Diet:Event')
     em = emmeans.emmeans(object=heatlme, specs=frm)
-    D1H = np.array([1,0,0,0,0,0])
-    D2H = np.array([0,1,0,0,0,0])
-    D3H = np.array([0,0,1,0,0,0])
-    D1R = np.array([0,0,0,1,0,0])
-    D2R = np.array([0,0,0,0,1,0])
-    D3R = np.array([0,0,0,0,0,1])
-    Rvec = np.array([0,0,0,1,1,1])
-    Hvec = np.array([1,1,1,0,0,0])
+
+
+    D1P = np.array([1,0,0,0,0,0,0,0,0])
+    D2P = np.array([0,1,0,0,0,0,0,0,0])
+    D3P = np.array([0,0,1,0,0,0,0,0,0])
+
+    D1H = np.array([0,0,0,1,0,0,0,0,0])
+    D2H = np.array([0,0,0,0,1,0,0,0,0])
+    D3H = np.array([0,0,0,0,0,1,0,0,0])
+
+    D1R = np.array([0,0,0,0,0,0,1,0,0])
+    D2R = np.array([0,0,0,0,0,0,0,1,0])
+    D3R = np.array([0,0,0,0,0,0,0,0,1])
+
     conlist = robjects.ListVector({
-                    "Recovery - Heat" : Rvec - Hvec,
-                    "Heat: D1 - D3" : D1H - D3H,
-                    "Heat: D2 - D3" : D2H - D3H,
-                    "Recovery: D1 - D3" : D1R - D3R,
-                    "Recovery: D2 - D3" : D2R - D3R })
-    ct = emmeans.contrast(em, method=conlist )  # ct of type methods.RS4
+       "preHeat: D2 - D1": D2P - D1P,
+       "preHeat: D3 - D1": D3P - D1P,
+
+       "Heat: D2 - D1": D2H - D1H,
+       "Heat: D3 - D1": D3H - D1H,
+
+       "Recovery: D2 - D1": D2R - D1R,
+       "Recovery: D3 - D1": D3R - D1R  })
+    ct = emmeans.contrast(em, method=conlist , adjust="holm")  # ct of type methods.RS4
     ctnew = base.as_data_frame(ct) # needed to convert methods.RS4 to R dataframe to convert into pandas dataframe
     fd = pandas2ri.rpy2py_dataframe(ctnew)
-    fd = fd.loc[:,('contrast','estimate')]
     fd['trait'] = TRAITvalue
+    fd[['Event', 'diet_contrast']] = fd['contrast'].str.split(':', expand=True)
+    fd = fd.loc[:, ('trait', 'Event', 'diet_contrast','estimate', 'SE', 't.ratio', 'p.value')]
+    fd = fd.rename(columns= {'diet_contrast':'contrast'})  # column name change
     return fd
 
 

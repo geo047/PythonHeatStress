@@ -1,10 +1,14 @@
 import matplotlib.pyplot as plt
+
 import matplotlib
+matplotlib.rcParams['figure.figsize'] = [15, 20] # for square canvas
+
 import pandas as pd
 import numpy as np
 import myplots as myplt
 from createInputFile import read_clean
 
+spval = 0.6
 
 mydf = read_clean()
 
@@ -21,50 +25,62 @@ cols= np.delete( cols, [0,1,2,3,(len(cols)-2),(len(cols)-1) ] )  # trait names f
 # the first plot in the panel has incorrect font size (they are huge).
 # All the multi-panel plots followingn this are fine. Weird.
 fig = plt.figure()
-fig.subplots_adjust(hspace=0.6, wspace=0.6)
+####!!!! fig.subplots_adjust(hspace=spval, wspace=spval)
 counter = 0
-for ii in cols[0:9]:
+for ii in cols[0:12]:
     counter += 1
-    ax = fig.add_subplot(3, 3, counter)
+    ax = fig.add_subplot(4, 3, counter)
 
     # plottype is for which axis is to remain on
-    lookup = pd.DataFrame({'counter':np.arange(0,9,1),
+    lookup = pd.DataFrame({'counter':np.arange(0,12,1),
                            'plottype':['y','none','none',
+                                       'y','none','none',
                                        'y','none','none',
                                        'xy','xy','xy' ]})
     x = lookup.loc[lookup['counter'] == counter-1, 'plottype' ].item()
     p = myplt.my_plot(df=mydf, traitnme=ii, plottype = x )
+
+
 plt.savefig('multiplotfig1.jpg', dpi=300)
 
 
+
+
+
 fig = plt.figure()
-fig.subplots_adjust(hspace=0.6, wspace=0.6)
+####!!!!! fig.subplots_adjust(hspace= spval, wspace=spval)
 counter = 0
-for ii in cols[0:9]:
+for ii in cols[0:12]:
     counter += 1
-    ax = fig.add_subplot(3, 3, counter)
+    ax = fig.add_subplot(4, 3, counter)
 
     # plottype is for which axis is to remain on
-    lookup = pd.DataFrame({'counter':np.arange(0,9,1),
+    lookup = pd.DataFrame({'counter':np.arange(0,12,1),
                            'plottype':['y','none','none',
+                                       'y','none','none',
                                        'y','none','none',
                                        'xy','xy','xy' ]})
     x = lookup.loc[lookup['counter'] == counter-1, 'plottype' ].item()
     p = myplt.my_plot(df=mydf, traitnme=ii, plottype = x )
+
+
+
 plt.savefig('multiplotfig1.jpg', dpi=300)
 
 
 
+
 fig = plt.figure()
-fig.subplots_adjust(hspace=0.6, wspace=0.6)
+fig.subplots_adjust(hspace=spval, wspace=spval)
 counter = 0
-for ii in cols[9:18]:
+for ii in cols[12:24]:
     counter += 1
-    ax = fig.add_subplot(3, 3, counter)
+    ax = fig.add_subplot(4, 3, counter)
 
     # plottype is for which axis is to remain on
-    lookup = pd.DataFrame({'counter':np.arange(0,9,1),
+    lookup = pd.DataFrame({'counter':np.arange(0,12,1),
                            'plottype':['y','none','none',
+                                       'y','none','none',
                                        'y','none','none',
                                        'xy','xy','xy' ]})
     x = lookup.loc[lookup['counter'] == counter-1, 'plottype' ].item()
@@ -74,15 +90,16 @@ plt.savefig('multiplotfig2.jpg', dpi=300)
 
 
 fig = plt.figure()
-fig.subplots_adjust(hspace=0.6, wspace=0.6)
+fig.subplots_adjust(hspace=spval, wspace=spval)
 counter = 0
-for ii in cols[18:27]:
+for ii in cols[24:32]:
     counter += 1
-    ax = fig.add_subplot(3, 3, counter)
+    ax = fig.add_subplot(4, 3, counter)
 
     # plottype is for which axis is to remain on
-    lookup = pd.DataFrame({'counter':np.arange(0,9,1),
+    lookup = pd.DataFrame({'counter':np.arange(0,12,1),
                            'plottype':['y','none','none',
+                                       'y','none','none',
                                        'y','none','none',
                                        'xy','xy','xy' ]})
     x = lookup.loc[lookup['counter'] == counter-1, 'plottype' ].item()
@@ -92,21 +109,22 @@ plt.savefig('multiplotfig3.jpg', dpi=300)
 
 
 
-fig = plt.figure()
-fig.subplots_adjust(hspace=0.6, wspace=0.6)
-counter = 0
-for ii in cols[27:32]:
-    counter += 1
-    ax = fig.add_subplot(3, 3, counter)
-
-    # plottype is for which axis is to remain on
-    lookup = pd.DataFrame({'counter':np.arange(0,9,1),
-                           'plottype':['y','none','none',
-                                       'y','none','none',
-                                       'xy','xy','xy' ]})
-    x = lookup.loc[lookup['counter'] == counter-1, 'plottype' ].item()
-    p = myplt.my_plot(df=mydf, traitnme=ii, plottype = x )
-plt.savefig('multiplotfig4.jpg', dpi=300)
+# fig = plt.figure()
+# fig.subplots_adjust(hspace=spval, wspace=spval)
+# counter = 0
+# for ii in cols[27:32]:
+#     counter += 1
+#     ax = fig.add_subplot(3, 3, counter)
+#
+#     # plottype is for which axis is to remain on
+#     lookup = pd.DataFrame({'counter':np.arange(0,9,1),
+#                            'plottype':['y','none','none',
+#                                        'y','none','none',
+#                                        'xy','xy','xy' ]})
+#     x = lookup.loc[lookup['counter'] == counter-1, 'plottype' ].item()
+#     p = myplt.my_plot(df=mydf, traitnme=ii, plottype = x )
+#
+# plt.savefig('multiplotfig4.jpg', dpi=300)
 
 
 

@@ -40,12 +40,7 @@ cols = ['sodium', 'potassium' ,'chloride',
 #-------------------------------------------#
 # Create  Plots over Time               #
 #-------------------------------------------#
-import createMeanPlots
-
-exit()
-
-
-
+# import createMeanPlots
 
 
 
@@ -92,33 +87,34 @@ from myfunctions import my_analysis, my_analysisII, my_analysisIII, my_pval
 #----------------------------------------
 # Getting p-values for Model II
 #------------------------------------
-
-df_pval = pd.DataFrame(columns=['trait', 'Event', 'DietLevel', 'estimate', 'SE', 't.ratio', 'p.value'])
-
-for ii, word in enumerate(cols):
-    print(f' TRAIT VALUE = {word}')
-    tempdf = my_pval(TRAITvalue=word)
-
-    df_pval = pd.concat([df_pval, tempdf], axis=0) # row concat
-
-filenm = "/home/g/PyCharm/PythonHeatStress/df_pval.csv"
-df_pval.to_csv(filenm, index=False)
-print(df_pval)
-
-
-
-
-
-
-
-# print(cols)
 #
-# for ii in cols:
-#   print(f'Trait Value is .... {ii}')
-#   my_analysis(TRAITvalue=ii)
-# => Found that there were no significant contrasts in PreHeat.
-# Going to implement Ross's idea.
+# df_pval = pd.DataFrame(columns=['trait', 'Event', 'DietLevel', 'estimate', 'SE', 't.ratio', 'p.value'])
+# for ii, word in enumerate(cols):
+#     print(f' TRAIT VALUE = {word}')
+#     tempdf = my_pval(TRAITvalue=word)
+#     df_pval = pd.concat([df_pval, tempdf], axis=0) # row concat
+# filenm = "/home/g/PyCharm/PythonHeatStress/df_pval.csv"
+# df_pval.to_csv(filenm, index=False)
+# print(df_pval)
+#
+
+
+
+
+# Calculating contrasts of Diet I verse Diet II and III
+df_contrasts = pd.DataFrame(columns=['trait', 'Event', 'DietLevel', 'estimate', 'SE', 't.ratio', 'p.value'])
+for ii in cols:
+    print(f'Trait Value is .... {ii}')
+    tempdf = my_analysisII(TRAITvalue=ii)
+    df_contrasts = pd.concat([df_contrasts, tempdf], axis=0) # row concat
+filenm = "/home/g/PyCharm/PythonHeatStress/df_contrasts.csv"
+df_contrasts.to_csv(filenm, index=False)
+print(df_contrasts)
+
+
+
 #myplots.my_individual_plot(df=mydf, traitnme = "Magnesium")
+exit()
 
 
 

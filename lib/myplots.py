@@ -7,24 +7,30 @@ import matplotlib
 
 
 def my_plot(df, traitnme:str, plottype:str):
-    sns.set(font_scale=0.5)
+    # sns.set_style("white", {'grid.color': "0.2", "grid.linestyle": "--"})
+    # sns.set_context("notebook", rc={"grid.linewidth": 5})
     sns.set_style('ticks')
+    # sns.set_context("notebook", rc={"grid.linewidth": 5})
+
     #sns.set_palette("bright")
 
     mypal = sns.color_palette("bright", 3, desat=1)
 
+
     # Use palplot and pass in the variable:
+
 
     sp = sns.lineplot(data=df, x='DayNumber', y=traitnme, hue='Diet', errorbar=('se', 1.96 ),
                       hue_order=['Diet I', 'Diet II', 'Diet III'], alpha=1, palette=mypal, lw=3,
                       legend = True)
     sp.set(xlabel="Day Number", ylabel= ('Mean within Diet')   , title= traitnme )
-    sp.grid(False)
+    #####!!!!!sp.grid(False)
+
     handles, labels = sp.get_legend_handles_labels()
     sp.legend(handles=handles[0:], labels=labels[0:])
     plt.legend(loc='upper right')
     plt.legend(fancybox=True, framealpha=0.1, loc='upper right')
-    plt.setp(sp.get_legend().get_texts(), fontsize='4')
+ #   plt.setp(sp.get_legend().get_texts(), fontsize='14')
     plt.axvline(x=4.5, linestyle='dashed')
     plt.axvline(x=11.5, linestyle='dashed')
     if plottype == "y":
@@ -34,8 +40,10 @@ def my_plot(df, traitnme:str, plottype:str):
     if plottype == "none":
         sp.set(xlabel=None)
         sp.set(ylabel=None)
-
     #plt.show()
+
+    sp.set_yticklabels(sp.get_yticks().round(3), size=13)
+    sp.set_xticklabels(sp.get_xticks().round(3), size=13)
     return sp
 
 
