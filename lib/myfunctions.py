@@ -11,6 +11,10 @@
 #       print(nlme.ranef(mod1))   # random effect values
 #       robjects.r('print(ranef)')
 #       print(graphics.pairs(em))
+#       ct = xx.rx(10)   ## contains p-values
+# # Convert R list object into R dataframe and then R dataframe to pandaas dataframe
+#       ctnew = base.as_data_frame(ct)  # needed to convert methods.RS4 to R dataframe to convert into pandas dataframe
+#       df = pandas2ri.rpy2py_dataframe(ctnew)
 
 #
 #  Model Building and Significance Testing via
@@ -19,6 +23,7 @@
 
 
 import numpy as np
+import pandas as pd
 import rpy2.robjects as robjects
 from rpy2.robjects import pandas2ri
 from rpy2.robjects.packages import importr, data
@@ -81,35 +86,36 @@ def my_pval(TRAITvalue):
     frm = stats.as_formula(' ~ Event:Diet')
     em = emmeans.emmeans(object=mod2, specs=frm)
 
-    ct = emmeans.contrast(em, adjust="sidak")
+    ct = emmeans.contrast(em, adjust="holm")
     ctnew = base.as_data_frame(ct)  # needed to convert methods.RS4 to R dataframe to convert into pandas dataframe
     df = pandas2ri.rpy2py_dataframe(ctnew)
     df = df.round(3)
-    print(df)
-    exit()
+    df = df.reset_index()  # needed to do this because index started from 1 and would not concat properly.
+    traitcol = pd.DataFrame( {'trait': np.repeat(TRAITvalue, df.shape[0])} )
+    df = pd.concat([traitcol, df], axis=1)
 
-    # xx= lmerTest.summary_lmerModLmerTest(mod2)
-    # print(xx)
-    # exit()
-    # #i = robjects.IntVector(10)
-    # ct = xx.rx(10)   ## contains p-values
-    # # Convert R list object into R dataframe and then R dataframe to pandaas dataframe
-    # ctnew = base.as_data_frame(ct)  # needed to convert methods.RS4 to R dataframe to convert into pandas dataframe
-    # df = pandas2ri.rpy2py_dataframe(ctnew)
-    # df = df.round(3)
+    df[['Event', 'DietName', 'DietLevel', 'rubbish']] = df['contrast'].str.split(' ', expand=True)
+    df.sort_values(['Event', 'DietLevel'], inplace=True)
+    df = df[['trait', 'Event', 'DietLevel', 'estimate', 'SE', 't.ratio', 'p.value']]
 
-    rowindx = list(df.index)
-    indices = [i for i, s in enumerate(rowindx) if ':' in s]
-    df = df.iloc[indices,:]  # grad interaction terms only
-    df.rename(columns = {
-        df.columns.values[0]: 'estimate',
-        df.columns.values[1]: 'se',
-        df.columns.values[2]: 'df',
-        df.columns.values[3]: 'tvalue',
-        df.columns.values[4]: 'pvalue'
-    }, inplace=True)
-    # remove df columns
-    df = df.loc[:, ['estimate', 'se','tvalue', 'pvalue']]
+    # Convert categorical variable to a string and replace
+    # duplicate with string value
+    # Has to be done in this order. Event first, then trait  for
+    # duplicate removal.
+    x = df.loc[:, ['trait', 'Event']].duplicated()
+    df.Event = df.Event.astype(str)
+    df.loc[x, 'Event'] = ""
+
+    x = df.trait.duplicated()
+
+    df['trait'] = df.trait.astype(str)
+    df.loc[x, 'trait'] = ""
+
+
+    # Convert Event labels into  beter labels for report
+    df['Event'] = df['Event'].replace({'Event1': 'preHeat',
+                                       'Event2': 'Heat',
+                                        'Event3': 'Recovery'})
 
 
 

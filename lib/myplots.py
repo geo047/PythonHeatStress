@@ -15,22 +15,25 @@ def my_plot(df, traitnme:str, plottype:str):
 
     # Use palplot and pass in the variable:
 
-    sp = sns.lineplot(data=df, x='DayNumber', y=traitnme, hue='Diet', errorbar=('se', 1.96),
-                      hue_order=['Diet I', 'Diet II', 'Diet III'], alpha=0.925, palette=mypal, lw=3)
+    sp = sns.lineplot(data=df, x='DayNumber', y=traitnme, hue='Diet', errorbar=('se', 1.96 ),
+                      hue_order=['Diet I', 'Diet II', 'Diet III'], alpha=1, palette=mypal, lw=3,
+                      legend = True)
     sp.set(xlabel="Day Number", ylabel= ('Mean within Diet')   , title= traitnme )
     sp.grid(False)
     handles, labels = sp.get_legend_handles_labels()
     sp.legend(handles=handles[0:], labels=labels[0:])
     plt.legend(loc='upper right')
+    plt.legend(fancybox=True, framealpha=0.1, loc='upper right')
     plt.setp(sp.get_legend().get_texts(), fontsize='4')
     plt.axvline(x=4.5, linestyle='dashed')
     plt.axvline(x=11.5, linestyle='dashed')
     if plottype == "y":
         sp.set(xlabel=None)
     if plottype == "x":
+        sp.set(ylabel=None)
+    if plottype == "none":
         sp.set(xlabel=None)
-    if plottype == "x":
-        sp.set(xlabel=None)
+        sp.set(ylabel=None)
 
     #plt.show()
     return sp
