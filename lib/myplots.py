@@ -319,3 +319,18 @@ def my_bar_plot(df, eventType):
 
 
     #plt.show()
+
+
+def my_boxplot(df):
+
+    print(df)
+
+    s = sns.boxplot(x="contrast", y="p.value", hue="Event", data=df,
+                palette=['darkblue', 'blue', 'lightblue'])
+    s.set(ylim=(0,1))
+    plt.legend(fancybox=True, framealpha=0.1, loc='lower left')
+    plt.savefig('boxplot.jpg', dpi=300)
+
+    #plt.show()
+
+

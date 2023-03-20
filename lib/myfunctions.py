@@ -176,6 +176,7 @@ def my_analysisII(TRAITvalue):
     fd[['Event', 'diet_contrast']] = fd['contrast'].str.split(':', expand=True)
     fd = fd.loc[:, ('trait', 'Event', 'diet_contrast','estimate', 'SE', 't.ratio', 'p.value')]
     fd = fd.rename(columns= {'diet_contrast':'contrast'})  # column name change
+
     return fd
 
 
@@ -228,3 +229,11 @@ def my_analysisIII(TRAITvalue):
 
     return fd
 
+
+def my_convert(df):
+    # Removing duplicate trait values in data frame to make it more pretty.
+    x = df.trait.duplicated()
+    df['trait'] = df['trait'].apply(str)
+    df.loc[x, 'trait'] = ""
+
+    return df

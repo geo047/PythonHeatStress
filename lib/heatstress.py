@@ -71,7 +71,7 @@ cols = ['sodium', 'potassium' ,'chloride',
 # r_dataframe = pandas2ri.py2rpy(pd_df)
 # print(r_dataframe)
 
-from myfunctions import my_analysis, my_analysisII, my_analysisIII, my_pval
+from myfunctions import my_analysis, my_analysisII, my_analysisIII, my_pval, my_convert
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~``
@@ -102,14 +102,51 @@ from myfunctions import my_analysis, my_analysisII, my_analysisIII, my_pval
 
 
 # Calculating contrasts of Diet I verse Diet II and III
-df_contrasts = pd.DataFrame(columns=['trait', 'Event', 'DietLevel', 'estimate', 'SE', 't.ratio', 'p.value'])
+df_contrasts = pd.DataFrame(columns=['trait', 'Event', 'contrast', 'estimate', 'SE', 't.ratio', 'p.value'])
 for ii in cols:
     print(f'Trait Value is .... {ii}')
     tempdf = my_analysisII(TRAITvalue=ii)
     df_contrasts = pd.concat([df_contrasts, tempdf], axis=0) # row concat
-filenm = "/home/g/PyCharm/PythonHeatStress/df_contrasts.csv"
-df_contrasts.to_csv(filenm, index=False)
-print(df_contrasts)
+
+
+# Separate into 3 data files - preHeat, Heat, and Recovery
+df_preHeat = df_contrasts.query('Event == "preHeat"')
+df_Heat = df_contrasts.query('Event == "Heat"')
+df_Recovery = df_contrasts.query('Event == "Recovery"')
+
+
+
+df_preHeat = my_convert(df=df_preHeat)
+df_preHeat  = df_preHeat.replace({'D2 - D1': 'II - I', 'D3 - D1': 'III - I'}, regex= True)
+df_preHeat = df_preHeat.drop(columns = 'Event')
+df_preHeat = df_preHeat.round(3)
+filenm = "/home/g/PyCharm/PythonHeatStress/df_contrasts_preHeat.csv"
+df_preHeat.to_csv(filenm, index=False)
+
+
+df_Heat = my_convert(df=df_Heat)
+df_Heat  = df_Heat.replace({'D2 - D1': 'II - I', 'D3 - D1': 'III - I'}, regex= True)
+df_Heat = df_Heat.drop(columns = 'Event')
+df_Heat = df_Heat.round(3)
+filenm = "/home/g/PyCharm/PythonHeatStress/df_contrasts_Heat.csv"
+df_Heat.to_csv(filenm, index=False)
+
+
+
+df_Recovery = my_convert(df=df_Recovery)
+df_Recovery  = df_Recovery.replace({'D2 - D1': 'II - I', 'D3 - D1': 'III - I'}, regex= True)
+df_Recovery = df_Recovery.drop(columns = 'Event')
+df_Recovery = df_Recovery.round(3)
+filenm = "/home/g/PyCharm/PythonHeatStress/df_contrasts_Recovery.csv"
+df_Recovery.to_csv(filenm, index=False)
+
+
+#--------------------------------------------------------------
+# Decided to investigate change in p-values, across traits,
+#  via box plots
+# -----------------------------------------------------------------
+
+myplots.my_boxplot(df=df_contrasts)
 
 
 
@@ -179,6 +216,7 @@ myplots.my_bar_plot(df=df_em, eventType="Event3")
 
 df_em = df_em.iloc[:, [ 6, 1, 0, 2, 3, 4, 5 ]]  # reorganize cols to be trait first
 df_em = df_em.round(3)  # rount to 3 decimal places
+
 
 # Convert categorical variable to a string and replace
 # duplicate with string value
