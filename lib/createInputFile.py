@@ -30,7 +30,7 @@ def read_clean():
 #    After talking to Gene, she wanted actually day of trial
 #    mydf.Sample-= 1 # reindexing Sample day number to start from 1.
 
-    # Add the 5 additional blood traits
+    # Add the 5 + 4  additional blood traits
 
 
 

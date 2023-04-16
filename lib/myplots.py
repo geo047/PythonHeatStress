@@ -5,6 +5,8 @@ import numpy as np
 from matplotlib import pyplot as plt, patches
 import matplotlib
 
+spval = 0.6
+
 
 def my_plot(df, traitnme:str, plottype:str):
     # sns.set_style("white", {'grid.color': "0.2", "grid.linestyle": "--"})
@@ -47,12 +49,37 @@ def my_plot(df, traitnme:str, plottype:str):
     return sp
 
 
-def my_individual_plot(df, traitnme:str):
+def my_individual_plot(df):
+
+    # Using relplot here which is a faceplot function.
+    # It's tricker to use. Need to melt dataframe.
+
+    # Standardizing the dataframe
+    cols = df.columns
+    cols = cols[: len(cols)-2]
+    cols = cols[4:]
+
+    norm_mydf = (df.loc[:, cols] - df.loc[:, cols].mean(numeric_only=True)) / \
+                df.loc[:, cols].std(numeric_only=True)
+
+    mydf = pd.concat([df.iloc[:,0:4], norm_mydf.iloc[:], df.iloc[:,-2],df.iloc[:,-1:]], axis=1)
+
+
+
+    dfmelt = pd.melt(mydf, id_vars=['ID','Sample', 'Sample_Date','Diet', 'Event', 'DayNumber'])
+
+
+
+
+    # query the data
+    dfmelt1 = dfmelt[dfmelt['variable'].isin(cols[0:10])]
+    dfmelt2 = dfmelt[dfmelt['variable'].isin(cols[10:20])]
+    dfmelt3 = dfmelt[dfmelt['variable'].isin(cols[20:30])]
 
     sns.set_theme(style="ticks")
 
     palette = sns.color_palette("rocket_r")
-    myid = df['ID'].unique()
+    myid = dfmelt['ID'].unique()
     #myid.sort()  # sorts inplace
     myid = ['3795', '3793', '3796',
             '3799', '3794', '3798',
@@ -60,7 +87,9 @@ def my_individual_plot(df, traitnme:str):
             '3802', '3805', '3804'
             ]
 
-    g = sns.relplot(data=df, x="Sample", y=traitnme, hue="ID",
+    counter=0
+    for ii in [dfmelt1, dfmelt2, dfmelt3]:
+        g = sns.relplot(data=ii, x="DayNumber", y="value", hue="ID", col="variable",
                     row="Diet", height = 5, aspect=0.75, style="ID", kind="line",
                     row_order=['Diet I', 'Diet II', 'Diet III'], markers="o",
                     linewidth=3,
@@ -68,144 +97,44 @@ def my_individual_plot(df, traitnme:str):
                     facet_kws={"margin_titles": True},
                     dashes = [(1,1),(2,1),(1,1),(1,1),(3,1),(2,1),(2,1),(3,1),(4,1),(3,1),(4,1),(4,1) ]
                     )
+        g.set(ylim=(-5, 5))
+        lenofarray = len(df['Sample'].unique())
+        lenofarray += 1
+#        g.set(xticks=np.arange(1, lenofarray, 1))
+        print(np.arange(1, lenofarray, 1))
+        xx = np.array( ii['DayNumber'].unique() + 1)
+
+        g.set(xticks=xx)
+        g.set_xticklabels(xx, size=14, rotation=45)
+
+        yy = np.arange(-4,5,1)
+        g.set(yticks = yy)
+        g.set_yticklabels(yy, size=14)
+
+        # print(xx)
+        # print(len(xx))
+        # exit()
+        # g.set_xticklabels(  xx  , size=18)
+        # print(np.arange(-4,4,2))
+        # exit()
+        # g.set_yticklabels( np.arange(-4,4,2), size=18)
 
 
-    lenofarray = len(df['Sample'].unique())
-    lenofarray += 1
-    g.set(xticks=np.arange(1, lenofarray, 1))
-    g.set_xticklabels(np.arange(1, lenofarray, 1) )
+        g.set_titles(col_template="{col_name}", row_template="{row_name}")
+
+    #    g.set_ylabels(traitnme, clear_inner=False)
+        g.set_xlabels("Day Number",  clear_inner=False)
+        g.set_ylabels("Standardized Value", clear_inner=False)
+
+        #    g.fig.suptitle(traitnme, fontsize=16)
+        g.fig.subplots_adjust(top=0.9, bottom=0.1, left=0.05, right=0.95)
+        g.legend.remove()
+        counter+=1
+        plt.savefig('individual' + str(counter) + '.jpg', dpi=300)
+
+    return 0
 
 
-    g.set_titles(col_template="{col_name}", row_template="{row_name}")
-
-    g.set_ylabels(traitnme, clear_inner=False)
-    g.set_xlabels("Day Number",  clear_inner=False)
-    g.fig.suptitle(traitnme, fontsize=16)
-    g.fig.subplots_adjust(top=0.9, bottom=0.1)
-    g.legend.remove()
-    #plt.show()
-
-
-
-    sns.set(font_scale=0.5)
-    sns.set_style('ticks')
-
-    fig = plt.figure()
-    fig.subplots_adjust(hspace=0.4, wspace=0.4)
-
-    # PreHeat   + Diet I
-    ax = fig.add_subplot(3, 3, 1)
-    dfsub = df.query('Event == "PreHeat"  & Diet == "diet I" ')
-    mypal = sns.color_palette("bright", 4, desat=1)
-    sp = sns.lineplot(data=dfsub, x='Sample', y=traitnme, hue='ID', sharex=True,
-                      alpha=0.925, palette=mypal, lw=2, marker="o")
-    sp.set_ylim(df[traitnme].min(), df[traitnme].max())
-
-    sp.grid(False)
-    sp.get_legend().remove()
-
-
-
-    # Heat   + Diet I
-    ax = fig.add_subplot(3, 3, 2)
-    dfsub = df.query('Event == "Heat"  & Diet == "diet I" ')
-    mypal = sns.color_palette("bright", 4, desat=1)
-    sp = sns.lineplot(data=dfsub, x='Sample', y=traitnme, hue='ID', sharex=True,
-                      alpha=0.925, palette=mypal, lw=2, marker="o")
-    sp.set_ylim(df[traitnme].min(), df[traitnme].max())
-
-    sp.grid(False)
-    sp.get_legend().remove()
-
-    # Recovery   + Diet I
-    ax = fig.add_subplot(3, 3, 3)
-    #print(df.Event.unique())
-
-    dfsub = df.query('Event == "Recovery"  & Diet == "diet I" ')
-    mypal = sns.color_palette("bright", 4, desat=1)
-    sp = sns.lineplot(data=dfsub, x='Sample', y=traitnme, hue='ID', sharex=True,
-                      alpha=0.925, palette=mypal, lw=2, marker="o")
-    sp.set_ylim(df[traitnme].min(), df[traitnme].max())
-
-    sp.grid(False)
-    sp.get_legend().remove()
-
-    #plt.show()
-
-
-
-#
-# def rect_plot(df, min_neg, max_pos):
-#     plt.rcParams["figure.figsize"] = [7.00, 7.00]
-#     plt.rcParams["figure.autolayout"] = True
-#
-#     fig = plt.figure()
-#     ax = fig.add_subplot(111)
-#
-#     #          Heat      Recovery
-#     #        +---------------------+
-#     #   D1   | D1-D3   |  D1-D3    |
-#     #        |-------  + ----------|
-#     #   D2   | D2-D3   |  D2-D3    |
-#     #        +---------------------+
-#     #  Upper Left
-#     val = df.iat[1, 1]
-#     if val < 0:
-#         cmap = matplotlib.pyplot.get_cmap('Greys')
-#         rgba = cmap(val/min_neg)
-#         matplotlib.pyplot.text(x=-4, y=2, s="Heat: D1 - D3", fontsize=18, color="blue")
-#     else:
-#         cmap = matplotlib.pyplot.get_cmap('Reds')
-#         rgba = cmap(val/max_pos)
-#         ax = matplotlib.pyplot.text(x=-4, y=2, s="Heat: D1 - D3", fontsize=18, color="blue")
-#     rectD1H = patches.Rectangle((-5, 0), 5, 5, facecolor= rgba , linewidth=1)
-#
-#
-#     val = df.iat[3, 1]
-#     if val < 0:
-#         cmap = matplotlib.pyplot.get_cmap('Greys')
-#         rgba = cmap(val/min_neg)
-#         matplotlib.pyplot.text(x=1, y=2, s="Rec: D1 - D3", fontsize=18, color="blue")
-#     else:
-#         cmap = matplotlib.pyplot.get_cmap('Reds')
-#         rgba = cmap(val/max_pos)
-#         matplotlib.pyplot.text(x=1, y=2, s="Rec: D1 - D3", fontsize=18, color="blue")
-#     rectD1R = patches.Rectangle((0, 0), 5, 5, facecolor=rgba, linewidth=1)
-#
-#     val = df.iat[2, 1]
-#     if val < 0:
-#         cmap = matplotlib.pyplot.get_cmap('Greys')
-#         rgba = cmap(val/min_neg)
-#         matplotlib.pyplot.text(x=-4, y=-2, s="Heat: D2 - D3", fontsize=18, color="blue")
-#     else:
-#         cmap = matplotlib.pyplot.get_cmap('Reds')
-#         rgba = cmap(val/max_pos)
-#         matplotlib.pyplot.text(x=-4, y=-2, s="Heat: D2 - D3", fontsize=18, color="blue" )
-#     rectD2H = patches.Rectangle((-5, -5), 5, 5, facecolor=rgba, linewidth=1)
-#
-#
-#
-#     val = df.iat[4, 1]
-#     if val < 0:
-#         cmap = matplotlib.pyplot.get_cmap('Greys')
-#         rgba = cmap(val/min_neg)
-#         matplotlib.pyplot.text(x=1, y=-2, s="Rec: D2 - D3", fontsize=18, color= "blue")
-#     else:
-#         cmap = matplotlib.pyplot.get_cmap('Reds')
-#         rgba = cmap(val/max_pos)
-#         matplotlib.pyplot.text(x=1, y=-2, s="Rec: D2 - D3", fontsize=18, color= "blue")
-#     rectD2R = patches.Rectangle((0, -5), 5, 5, facecolor=rgba, linewidth=1)
-#
-#     ax.add_patch(rectD1H)
-#     ax.add_patch(rectD1R)
-#     ax.add_patch(rectD2H)
-#     ax.add_patch(rectD2R)
-#
-#     plt.xlim([-5, 5])
-#     plt.ylim([-5, 5])
-#     plt.title(df.trait[0])
-#     plt.axis("off")
-#     return ax
 
 def rect_plot(fig, ax, df, min_neg, max_pos):
     # Plot superceded. Too difficult to interpret differences. Contrast

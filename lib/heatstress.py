@@ -146,11 +146,16 @@ df_Recovery.to_csv(filenm, index=False)
 #  via box plots
 # -----------------------------------------------------------------
 
-myplots.my_boxplot(df=df_contrasts)
+#myplots.my_boxplot(df=df_contrasts)
 
 
+#----------------------------------------------
+# Adding individual plots as an appendix to report
+#----------------------------------------------------------
 
-#myplots.my_individual_plot(df=mydf, traitnme = "Magnesium")
+gg = myplots.my_individual_plot(df=mydf)
+print(gg)
+
 exit()
 
 
