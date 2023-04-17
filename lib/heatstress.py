@@ -28,10 +28,11 @@ mydf = read_clean()
 # mydf = pd.read_csv('/home/g/PyCharm/PythonHeatStress/Data/cleanedData.csv')
 # # extracting names of the traits in mydf. Removing the fixed effects cols.
 cols = ['sodium', 'potassium' ,'chloride',
- 'bicarbonate' ,'NA_Kratio' ,'aniongap' ,'glucose_serum', 'urea' ,'creatinine',
- 'calcium' ,'phospate' ,'CA_Pratio' ,'protein_total' ,'albumin' ,'globulin',
- 'A_Gratio' ,'billirubin_total' ,'ALP' ,'AST' ,'CK', 'cholesterol' ,'Magnesium',
- 'GammaGT', 'B_hydroxybutyrate' ,'GLDH', 'pH' ,'pCO2' ,'pO2' ,'BE' ,'HCO3']
+'bicarbonate' ,'NA_Kratio' ,'aniongap' ,'glucose_serum', 'urea' ,'creatinine',
+'calcium' ,'phospate' ,'CA_Pratio' ,'protein_total' ,'albumin' ,'globulin',
+'A_Gratio' ,'billirubin_total' ,'ALP' ,'AST' ,'CK', 'cholesterol' ,'Magnesium',
+'GammaGT', 'B_hydroxybutyrate' ,'GLDH', 'pH' ,'pCO2' ,'pO2' ,'BE' ,'HCO3',
+'LBP', 'LBPlog10', 'SAA', 'SAAlog10']
 
 
 
@@ -39,16 +40,19 @@ cols = ['sodium', 'potassium' ,'chloride',
 
 #-------------------------------------------#
 # Create  Plots over Time               #
+# Figure 1 in report + individualots for Gene
 #-------------------------------------------#
-# import createMeanPlots
+#import createMeanPlots
+import createIndivMeanPlots
+exit()
 
 
 
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ## One Way Anova of all traits
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#import oneWayANOVA
-#exit()
+# import oneWayANOVA
+# exit()
 
 
 
@@ -76,16 +80,18 @@ from myfunctions import my_analysis, my_analysisII, my_analysisIII, my_pval, my_
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~``
 #  Model Building
+# Table 1 AIC results in report
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
+#
 # for ii, word in enumerate(cols):
 #     print(f' TRAIT VALUE = {word}')
 #     my_analysis(TRAITvalue=word)
 #
 # exit()
-
+#
 #----------------------------------------
 # Getting p-values for Model II
+# Needed for Table 3 of report
 #------------------------------------
 #
 # df_pval = pd.DataFrame(columns=['trait', 'Event', 'DietLevel', 'estimate', 'SE', 't.ratio', 'p.value'])
@@ -96,50 +102,53 @@ from myfunctions import my_analysis, my_analysisII, my_analysisIII, my_pval, my_
 # filenm = "/home/g/PyCharm/PythonHeatStress/df_pval.csv"
 # df_pval.to_csv(filenm, index=False)
 # print(df_pval)
+# exit()
+
+
+
+
 #
-
-
-
-
-# Calculating contrasts of Diet I verse Diet II and III
-df_contrasts = pd.DataFrame(columns=['trait', 'Event', 'contrast', 'estimate', 'SE', 't.ratio', 'p.value'])
-for ii in cols:
-    print(f'Trait Value is .... {ii}')
-    tempdf = my_analysisII(TRAITvalue=ii)
-    df_contrasts = pd.concat([df_contrasts, tempdf], axis=0) # row concat
-
-
-# Separate into 3 data files - preHeat, Heat, and Recovery
-df_preHeat = df_contrasts.query('Event == "preHeat"')
-df_Heat = df_contrasts.query('Event == "Heat"')
-df_Recovery = df_contrasts.query('Event == "Recovery"')
-
-
-
-df_preHeat = my_convert(df=df_preHeat)
-df_preHeat  = df_preHeat.replace({'D2 - D1': 'II - I', 'D3 - D1': 'III - I'}, regex= True)
-df_preHeat = df_preHeat.drop(columns = 'Event')
-df_preHeat = df_preHeat.round(3)
-filenm = "/home/g/PyCharm/PythonHeatStress/df_contrasts_preHeat.csv"
-df_preHeat.to_csv(filenm, index=False)
-
-
-df_Heat = my_convert(df=df_Heat)
-df_Heat  = df_Heat.replace({'D2 - D1': 'II - I', 'D3 - D1': 'III - I'}, regex= True)
-df_Heat = df_Heat.drop(columns = 'Event')
-df_Heat = df_Heat.round(3)
-filenm = "/home/g/PyCharm/PythonHeatStress/df_contrasts_Heat.csv"
-df_Heat.to_csv(filenm, index=False)
-
-
-
-df_Recovery = my_convert(df=df_Recovery)
-df_Recovery  = df_Recovery.replace({'D2 - D1': 'II - I', 'D3 - D1': 'III - I'}, regex= True)
-df_Recovery = df_Recovery.drop(columns = 'Event')
-df_Recovery = df_Recovery.round(3)
-filenm = "/home/g/PyCharm/PythonHeatStress/df_contrasts_Recovery.csv"
-df_Recovery.to_csv(filenm, index=False)
-
+# # Calculating contrasts of Diet I verse Diet II and III
+# # Tables 2A, 2B, and 2C in report
+# df_contrasts = pd.DataFrame(columns=['trait', 'Event', 'contrast', 'estimate', 'SE', 't.ratio', 'p.value'])
+# for ii in cols:
+#     print(f'Trait Value is .... {ii}')
+#     tempdf = my_analysisII(TRAITvalue=ii)
+#     df_contrasts = pd.concat([df_contrasts, tempdf], axis=0) # row concat
+#
+#
+# # Separate into 3 data files - preHeat, Heat, and Recovery
+# df_preHeat = df_contrasts.query('Event == "preHeat"')
+# df_Heat = df_contrasts.query('Event == "Heat"')
+# df_Recovery = df_contrasts.query('Event == "Recovery"')
+#
+#
+#
+# df_preHeat = my_convert(df=df_preHeat)
+# df_preHeat  = df_preHeat.replace({'D2 - D1': 'II - I', 'D3 - D1': 'III - I'}, regex= True)
+# df_preHeat = df_preHeat.drop(columns = 'Event')
+# df_preHeat = df_preHeat.round(3)
+# filenm = "/home/g/PyCharm/PythonHeatStress/df_contrasts_preHeat.csv"
+# df_preHeat.to_csv(filenm, index=False)
+#
+#
+# df_Heat = my_convert(df=df_Heat)
+# df_Heat  = df_Heat.replace({'D2 - D1': 'II - I', 'D3 - D1': 'III - I'}, regex= True)
+# df_Heat = df_Heat.drop(columns = 'Event')
+# df_Heat = df_Heat.round(3)
+# filenm = "/home/g/PyCharm/PythonHeatStress/df_contrasts_Heat.csv"
+# df_Heat.to_csv(filenm, index=False)
+#
+#
+#
+# df_Recovery = my_convert(df=df_Recovery)
+# df_Recovery  = df_Recovery.replace({'D2 - D1': 'II - I', 'D3 - D1': 'III - I'}, regex= True)
+# df_Recovery = df_Recovery.drop(columns = 'Event')
+# df_Recovery = df_Recovery.round(3)
+# filenm = "/home/g/PyCharm/PythonHeatStress/df_contrasts_Recovery.csv"
+# df_Recovery.to_csv(filenm, index=False)
+#
+# exit()
 
 #--------------------------------------------------------------
 # Decided to investigate change in p-values, across traits,
@@ -152,11 +161,11 @@ df_Recovery.to_csv(filenm, index=False)
 #----------------------------------------------
 # Adding individual plots as an appendix to report
 #----------------------------------------------------------
-
-gg = myplots.my_individual_plot(df=mydf)
-print(gg)
-
-exit()
+#
+# gg = myplots.my_individual_plot(df=mydf)
+# print(gg)
+#
+# exit()
 
 
 

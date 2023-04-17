@@ -11,17 +11,16 @@ mydf = read_clean()
 
 # extracting names of the traits in mydf. Removing the fixed effects cols.
 cols = mydf.columns.values
-cols= np.delete( cols, [0,1,2,3,29] )  # trait names from columns of dataframe
+cols= np.delete( cols, [0,1,2,3,len(cols)-2, len(cols)-1] )  # trait names from columns of dataframe
 
 
-
-
+print(mydf.Diet.unique())
 for ii in cols:
     #print(mydf.query('Diet == "diet I"'))
 
-    fvalue, pvalue = stats.f_oneway(mydf.query('Diet == "diet I"')[ii],
-                                    mydf.query('Diet == "diet II"')[ii],
-                                    mydf.query('Diet == "diet III"')[ii],
+    fvalue, pvalue = stats.f_oneway(mydf.query('Diet == "Diet I"')[ii],
+                                    mydf.query('Diet == "Diet II"')[ii],
+                                    mydf.query('Diet == "Diet III"')[ii],
                                     )
     print(f'Trait = {ii }   F value = {round(fvalue,3)} p-value = {round(pvalue,3)}')
 

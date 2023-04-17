@@ -34,8 +34,9 @@ def read_clean():
 
 
 
-    sheetname = ["pH", "pCO2", 'pO2','BE','HCO3']
-    filenm = "/home/g/PyCharm/PythonHeatStress/Data/rawdata230223.xlsx"
+    sheetname = ["pH", "pCO2", 'pO2','BE','HCO3','LBP','LBP log10', 'SAA', 'SAA log10']
+    #filenm = "/home/g/PyCharm/PythonHeatStress/Data/rawdata230223.xlsx"
+    filenm = "/home/g/PyCharm/PythonHeatStress/Data/acidbu22_data160423.xlsx"
 
     for ii in sheetname:
         df = pd.read_excel(filenm, sheet_name=ii,

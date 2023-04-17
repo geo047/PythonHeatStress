@@ -28,6 +28,10 @@ def my_plot(df, traitnme:str, plottype:str):
     sp.set(xlabel="Day Number", ylabel= ('Mean within Diet')   , title= traitnme )
     #####!!!!!sp.grid(False)
 
+    xx = np.array(df['DayNumber'].unique())
+    sp.set(xticks=xx)
+    sp.set_xticklabels(xx+1,  rotation=45, size=13)
+
     handles, labels = sp.get_legend_handles_labels()
     sp.legend(handles=handles[0:], labels=labels[0:])
     plt.legend(loc='upper right')
@@ -45,7 +49,8 @@ def my_plot(df, traitnme:str, plottype:str):
     #plt.show()
 
     sp.set_yticklabels(sp.get_yticks().round(3), size=13)
-    sp.set_xticklabels(sp.get_xticks().round(3), size=13)
+    #sp.set_xticklabels(sp.get_xticks().round(3), size=13)
+
     return sp
 
 
@@ -72,11 +77,15 @@ def my_individual_plot(df):
 
 
     # query the data
-    dfmelt1 = dfmelt[dfmelt['variable'].isin(cols[0:10])]
-    dfmelt2 = dfmelt[dfmelt['variable'].isin(cols[10:20])]
-    dfmelt3 = dfmelt[dfmelt['variable'].isin(cols[20:30])]
+    dfmelt1 = dfmelt[dfmelt['variable'].isin(cols[0:6])]
+    dfmelt2 = dfmelt[dfmelt['variable'].isin(cols[6:12])]
+    dfmelt3 = dfmelt[dfmelt['variable'].isin(cols[12:18])]
+    dfmelt4 = dfmelt[dfmelt['variable'].isin(cols[18:24])]
+    dfmelt5 = dfmelt[dfmelt['variable'].isin(cols[24:30])]
+    dfmelt6 = dfmelt[dfmelt['variable'].isin(cols[30:34])]
 
     sns.set_theme(style="ticks")
+    sns.set_style("white")
 
     palette = sns.color_palette("rocket_r")
     myid = dfmelt['ID'].unique()
@@ -88,7 +97,7 @@ def my_individual_plot(df):
             ]
 
     counter=0
-    for ii in [dfmelt1, dfmelt2, dfmelt3]:
+    for ii in [dfmelt1, dfmelt2, dfmelt3, dfmelt4, dfmelt5, dfmelt6]:
         g = sns.relplot(data=ii, x="DayNumber", y="value", hue="ID", col="variable",
                     row="Diet", height = 5, aspect=0.75, style="ID", kind="line",
                     row_order=['Diet I', 'Diet II', 'Diet III'], markers="o",
@@ -102,10 +111,11 @@ def my_individual_plot(df):
         lenofarray += 1
 #        g.set(xticks=np.arange(1, lenofarray, 1))
         print(np.arange(1, lenofarray, 1))
-        xx = np.array( ii['DayNumber'].unique() + 1)
+        xx = np.array( ii['DayNumber'].unique())
 
         g.set(xticks=xx)
-        g.set_xticklabels(xx, size=14, rotation=45)
+        g.set_xticklabels(xx+1, size=14, rotation=45)
+
 
         yy = np.arange(-4,5,1)
         g.set(yticks = yy)
@@ -263,3 +273,34 @@ def my_boxplot(df):
     #plt.show()
 
 
+def my_mean_plot(df, traitnme:str):
+    # sns.set_style('ticks')
+
+    sns.set_theme(style="white", font_scale=1.5, rc = {'figure.figsize': (11.7, 8.27)})
+#    sns.set(rc={'figure.figsize': (11.7, 8.27)})
+    mypal = sns.color_palette("bright", 3, desat=1)
+
+    sp = sns.lineplot(data=df, x='DayNumber', y=traitnme, hue='Diet', errorbar=('se', 1.96 ),
+                      hue_order=['Diet I', 'Diet II', 'Diet III'], alpha=1, palette=mypal, lw=3,
+                      legend = True)
+    sp.set(xlabel="Day Number", ylabel= ('Mean within Diet')   , title= traitnme )
+
+
+    xx = np.array(df['DayNumber'].unique())
+    sp.set(xticks=xx)
+    sp.set_xticklabels(xx+1,  rotation=0)
+
+    handles, labels = sp.get_legend_handles_labels()
+    sp.legend(handles=handles[0:], labels=labels[0:])
+    plt.legend(loc='upper right')
+    plt.legend(fancybox=True, framealpha=0.1, loc='upper right')
+    plt.axvline(x=4.5, linestyle='dashed')
+    plt.axvline(x=11.5, linestyle='dashed')
+
+    sp.set_yticklabels(sp.get_yticks().round(3))
+    #sp.set_xticklabels(sp.get_xticks().round(3), size=20)
+
+    plt.savefig("/home/g/PyCharm/PythonHeatStress/lib/IndividualPlots/" + traitnme + '.jpg', dpi=300)
+    plt.close()
+
+    return sp

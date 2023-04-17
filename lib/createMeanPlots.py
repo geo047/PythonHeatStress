@@ -1,3 +1,5 @@
+# Figure 1 in report
+
 import matplotlib.pyplot as plt
 
 import matplotlib
@@ -92,7 +94,7 @@ plt.savefig('multiplotfig2.jpg', dpi=300)
 fig = plt.figure()
 fig.subplots_adjust(hspace=spval, wspace=spval)
 counter = 0
-for ii in cols[24:32]:
+for ii in cols[24:34]:
     counter += 1
     ax = fig.add_subplot(4, 3, counter)
 
@@ -105,27 +107,6 @@ for ii in cols[24:32]:
     x = lookup.loc[lookup['counter'] == counter-1, 'plottype' ].item()
     p = myplt.my_plot(df=mydf, traitnme=ii, plottype = x )
 plt.savefig('multiplotfig3.jpg', dpi=300)
-
-
-
-
-# fig = plt.figure()
-# fig.subplots_adjust(hspace=spval, wspace=spval)
-# counter = 0
-# for ii in cols[27:32]:
-#     counter += 1
-#     ax = fig.add_subplot(3, 3, counter)
-#
-#     # plottype is for which axis is to remain on
-#     lookup = pd.DataFrame({'counter':np.arange(0,9,1),
-#                            'plottype':['y','none','none',
-#                                        'y','none','none',
-#                                        'xy','xy','xy' ]})
-#     x = lookup.loc[lookup['counter'] == counter-1, 'plottype' ].item()
-#     p = myplt.my_plot(df=mydf, traitnme=ii, plottype = x )
-#
-# plt.savefig('multiplotfig4.jpg', dpi=300)
-
 
 
 
