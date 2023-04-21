@@ -57,6 +57,7 @@ def my_analysis(TRAITvalue):
     mod1 = stats.lm(frm, data=r_dataframe)
     print(stats.BIC(mod1))
 
+
     frm = stats.as_formula(TRAITvalue + ' ~ 1 + Diet*Event + (1|ID)')
     mod2 = lme4.lmer(frm, data=r_dataframe)
 
@@ -64,6 +65,10 @@ def my_analysis(TRAITvalue):
     mod3 = lme4.lmer(frm, data=r_dataframe)
     print(stats.anova(mod2, mod3))
  #   print(stats.anova(mod1,mod3))
+
+
+
+
     print(' ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ')
 
  #   print(pb.PBmodcomp(mod3, mod2 , nsim=1000, seed=101) )
@@ -144,6 +149,8 @@ def my_analysisII(TRAITvalue):
     #frm = stats.as_formula(TRAITvalue + ' ~ 1 + timecov1 + timecov2 + Diet*Event + (1|ID)')
     frm = stats.as_formula(TRAITvalue + ' ~ 1 + Diet*Event + (1|ID)')
     heatlme = lme4.lmer(frm, data=r_dataframe)
+
+
     frm = stats.as_formula( ' ~ Diet:Event')
     em = emmeans.emmeans(object=heatlme, specs=frm)
 

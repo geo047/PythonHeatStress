@@ -56,8 +56,8 @@ def read_clean():
         mydf = pd.merge(mydf, df, how='left', on=['ID', 'Sample_Date'])
     # create Event column
     conditions = [
-        mydf.Sample_Date <= '2022-10-01',
-        (mydf.Sample_Date > '2022-10-01') & (mydf.Sample_Date <= '2022-10-08'),
+        mydf.Sample_Date <= '2022-10-04',
+        (mydf.Sample_Date > '2022-10-04') & (mydf.Sample_Date <= '2022-10-08'),
         mydf.Sample_Date > '2022-10-08'
     ]
 

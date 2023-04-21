@@ -37,7 +37,7 @@ def my_plot(df, traitnme:str, plottype:str):
     plt.legend(loc='upper right')
     plt.legend(fancybox=True, framealpha=0.1, loc='upper right')
  #   plt.setp(sp.get_legend().get_texts(), fontsize='14')
-    plt.axvline(x=4.5, linestyle='dashed')
+    plt.axvline(x=7.5, linestyle='dashed')
     plt.axvline(x=11.5, linestyle='dashed')
     if plottype == "y":
         sp.set(xlabel=None)

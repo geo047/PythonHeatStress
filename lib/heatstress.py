@@ -43,15 +43,15 @@ cols = ['sodium', 'potassium' ,'chloride',
 # Figure 1 in report + individualots for Gene
 #-------------------------------------------#
 #import createMeanPlots
-import createIndivMeanPlots
-exit()
+#import createIndivMeanPlots
+#exit()
 
 
 
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ## One Way Anova of all traits
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# import oneWayANOVA
+#import oneWayANOVA
 # exit()
 
 
@@ -88,21 +88,21 @@ from myfunctions import my_analysis, my_analysisII, my_analysisIII, my_pval, my_
 #     my_analysis(TRAITvalue=word)
 #
 # exit()
-#
+
 #----------------------------------------
 # Getting p-values for Model II
 # Needed for Table 3 of report
 #------------------------------------
-#
-# df_pval = pd.DataFrame(columns=['trait', 'Event', 'DietLevel', 'estimate', 'SE', 't.ratio', 'p.value'])
-# for ii, word in enumerate(cols):
-#     print(f' TRAIT VALUE = {word}')
-#     tempdf = my_pval(TRAITvalue=word)
-#     df_pval = pd.concat([df_pval, tempdf], axis=0) # row concat
-# filenm = "/home/g/PyCharm/PythonHeatStress/df_pval.csv"
-# df_pval.to_csv(filenm, index=False)
-# print(df_pval)
-# exit()
+
+df_pval = pd.DataFrame(columns=['trait', 'Event', 'DietLevel', 'estimate', 'SE', 't.ratio', 'p.value'])
+for ii, word in enumerate(cols):
+    print(f' TRAIT VALUE = {word}')
+    tempdf = my_pval(TRAITvalue=word)
+    df_pval = pd.concat([df_pval, tempdf], axis=0) # row concat
+filenm = "/home/g/PyCharm/PythonHeatStress/df_pval.csv"
+df_pval.to_csv(filenm, index=False)
+print(df_pval)
+exit()
 
 
 
@@ -148,15 +148,17 @@ from myfunctions import my_analysis, my_analysisII, my_analysisIII, my_pval, my_
 # filenm = "/home/g/PyCharm/PythonHeatStress/df_contrasts_Recovery.csv"
 # df_Recovery.to_csv(filenm, index=False)
 #
-# exit()
+# # exit()
 
 #--------------------------------------------------------------
 # Decided to investigate change in p-values, across traits,
 #  via box plots
+# Figure 2 in report
 # -----------------------------------------------------------------
-
-#myplots.my_boxplot(df=df_contrasts)
-
+#
+# myplots.my_boxplot(df=df_contrasts)
+# exit()
+#
 
 #----------------------------------------------
 # Adding individual plots as an appendix to report
@@ -230,7 +232,6 @@ myplots.my_bar_plot(df=df_em, eventType="Event3")
 
 df_em = df_em.iloc[:, [ 6, 1, 0, 2, 3, 4, 5 ]]  # reorganize cols to be trait first
 df_em = df_em.round(3)  # rount to 3 decimal places
-
 
 # Convert categorical variable to a string and replace
 # duplicate with string value
